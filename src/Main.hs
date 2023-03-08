@@ -11,8 +11,8 @@ main :: IO ()
 main = play (InWindow "Fractals" (screenHeight, screenWidth) (0, 0))        -- Or Fullscreen
             black                                                           -- Background color
             60                                                              -- Frames per second
-            MkWorld                                                         -- Initial state
-            drawHandler                                                    -- View function
+            startWorld                                                      -- Initial state
+            drawHandler                                                     -- View function
             inputHandler                                                    -- Event function
             stepHandler                                                     -- Step function
 
