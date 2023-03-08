@@ -12,7 +12,7 @@ main = play (InWindow "Fractals" (500, 500) (0, 0))        -- Or Fullscreen
             black                                          -- Background color
             60                                             -- Frames per second
             MkWorld                                          -- Initial state
-            drawHandlerr                                    -- View function
+            drawHandler                                    -- View function
             inputHandler                                   -- Event function
             stepHandler                                    -- Step function
 
