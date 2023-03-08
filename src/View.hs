@@ -6,5 +6,5 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
 
 
-drawHandler :: World -> Picture
-drawHandler _ = Color red (Circle 25) 
+drawHandlerr :: World -> Picture
+drawHandlerr _ = Color red (Circle 25) 
