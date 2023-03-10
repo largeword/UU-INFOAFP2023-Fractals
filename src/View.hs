@@ -14,7 +14,7 @@ drawHandler (MkWorld _ _ _ _ p _) = p
 --   Input parameters are (unscaled) grid of points and grid of colours
 --   By zipping them together we can easily map pointToPicture over them
 --   Then the result is condensed into a single picture
-draw :: [[Point]] -> [[Color]] -> Picture
+draw :: Grid Point -> Grid Color -> Picture
 draw screen cols = let pointAndColour = zipWith zip screen cols
                        pics           = map (map pointToPicture) pointAndColour
                     in Pictures . map Pictures $ pics

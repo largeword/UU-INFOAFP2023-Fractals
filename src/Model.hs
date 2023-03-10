@@ -19,7 +19,7 @@ halfScrH = screenHeight `div` 2
 
 -- Data types regarding the representation and calculation of fractals
 data World = MkWorld 
-  { screen         :: [[Point]]
+  { screen         :: Grid Point
   , inputEvents    :: [Event]  
   , zoomScaling    :: Float
   , translation    :: (Int, Int)
@@ -27,6 +27,7 @@ data World = MkWorld
   , isChanged      :: Bool
 }
 
+type Grid a = [[a]]
 
 startWorld :: World
 startWorld = MkWorld
