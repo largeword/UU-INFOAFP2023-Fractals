@@ -5,7 +5,6 @@ import Model
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
-import GHC.Utils.Misc (uncurry3)
 
 
 drawHandler :: World -> Picture
@@ -31,14 +30,14 @@ pointToPicture ((x, y), c) = Translate x y $ Color c $ Circle 1
 -- | Default color list
 --   https://colorswall.com/palette/128774
 colorList :: [Color]
-colorList = [uncurry3 makeColorI rgb 1 | rgb <- rgbs ]
-  where  --   R    G    B
-    rgbs = [ (43 , 192, 232)
-           , (246, 203, 102)
-           , (72 , 68 , 152)
-           , (99 , 167, 94 )
-           , (160, 172, 180)
-           , (68 , 62 , 94 )]
+colorList = [makeColorI r g b a | (r,g,b,a) <- rgbs ]
+  where  --    R    G    B   A
+    rgbs = [ (43 , 192, 232, 1)
+           , (246, 203, 102, 1)
+           , (72 , 68 , 152, 1)
+           , (99 , 167, 94 , 1)
+           , (160, 172, 180, 1)
+           , (68 , 62 , 94 , 1)]
 
 
 -- | This function maps the Grid of escaping steps into the corresponding colors
