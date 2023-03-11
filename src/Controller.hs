@@ -16,7 +16,7 @@ inputHandler _ w = w
 stepHandler :: Float -> World -> World
 stepHandler _ w@(MkWorld screen _ z t _ True) =
     let picture = draw screen        -- turned into a pretty picture 'v'
-                . getColours cols    -- turned into coloured grid   :: Grid Color
+                . getColors cols    -- turned into colored grid   :: Grid Color
                 . getEscapeSteps 25  -- turned into numbered grid   :: Grid Int
                 . getSequences       -- turned into sequenced grid  :: Grid [Point]
                 . (`scale` (z, t))   -- Scaled to our parameters    :: Grid Point
