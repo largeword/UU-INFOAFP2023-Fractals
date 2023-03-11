@@ -50,7 +50,7 @@ fixedZ c = getIterations nextZDefault (z, c)
 
 -- | Given a scaled grid, compute the sequences of iterations
 getSequences :: Grid Point -> Grid [Point]
-getSequences grid = gridMap fixedC grid
+getSequences grid = gridMap fixedZ grid
 
 
 -- | Given a sequenced grid and a step treshold n,

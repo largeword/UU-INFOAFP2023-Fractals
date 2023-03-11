@@ -6,6 +6,8 @@ import Generator
 import Graphics.Gloss hiding (scale)
 import Graphics.Gloss.Interface.IO.Interact hiding (scale)
 
+import Debug.Trace
+
 inputHandler :: Event -> World -> World
 inputHandler _ w = w
 
@@ -15,20 +17,26 @@ inputHandler _ w = w
 --   only if our boolean flag is set to True
 stepHandler :: Float -> World -> World
 stepHandler _ w@(MkWorld screen _ z t _ True) =
-    let picture = draw screen        -- turned into a pretty picture 'v'
-                . getColors cols    -- turned into colored grid   :: Grid Color
-                . getEscapeSteps 25  -- turned into numbered grid   :: Grid Int
-                . getSequences       -- turned into sequenced grid  :: Grid [Point]
-                . (`scale` (z, t))   -- Scaled to our parameters    :: Grid Point
-                $ screen             -- The unscaled default screen :: Grid Point
+    let picture = draw screen          -- turned into a pretty picture 'v'
+                . getColors colorList  -- turned into colored grid    :: Grid Color
+                . getEscapeSteps 100   -- turned into numbered grid   :: Grid Int
+                . getSequences         -- turned into sequenced grid  :: Grid [Point]
+                . (`scale` (z, t))     -- Scaled to our parameters    :: Grid Point
+                $ screen               -- The unscaled default screen :: Grid Point
      in w { currentPicture = picture, isChanged = False }
 
 -- | Default case - nothing is changed
 stepHandler _ w = w
 
 
+-- | Simple default scale function
+--   it only does the zooming right now, and not even that well tbh
 scale :: Grid Point -> (Float, (Int, Int)) -> Grid Point
-scale = undefined
+scale grid _ = gridMap f grid
+  where
+    f :: Point -> Point
+    f (r, i) = (r * z, i * z)
+    z = 1 / 125
 
 
 

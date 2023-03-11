@@ -44,8 +44,18 @@ gridMap :: (a -> b) -> Grid a -> Grid b
 gridMap f = map (map f)
 
 
-cols :: [Color]
-cols = [black, red, orange, yellow, white]
+
+-- | Default color list
+--   https://colorswall.com/palette/128774
+colorList :: [Color]
+colorList = [makeColorI r g b a | (r,g,b,a) <- rgbs ]
+  where  --    R    G    B   A
+    rgbs = [ (43 , 192, 232, 255)
+           , (246, 203, 102, 255)
+           , (72 , 68 , 152, 255)
+           , (99 , 167, 94 , 255)
+           , (160, 172, 180, 255)
+           , (68 , 62 , 94 , 255)]
 
 -- How to get from a fixed grid of 2-D floating point to adjustable fractals/pictures:
     -- 1.  Initialise world
