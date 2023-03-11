@@ -24,3 +24,7 @@ draw screen cols = let pointAndColour = zipWith zip screen cols
 --   these need to be the unscaled versions.
 pointToPicture :: (Point, Color) -> Picture
 pointToPicture ((x, y), c) = Translate x y $ Color c $ Circle 1
+
+
+getColours :: [Color] -> Grid Int -> Grid Color
+getColours = undefined

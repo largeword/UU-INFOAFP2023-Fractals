@@ -27,8 +27,6 @@ data World = MkWorld
   , isChanged      :: Bool
 }
 
-type Grid a = [[a]]
-
 startWorld :: World
 startWorld = MkWorld
     [[(fromIntegral $ x - halfScrW, fromIntegral $ y - halfScrH) | x <- [0..screenWidth-1]] | y <- [0..screenHeight-1]]
@@ -37,6 +35,17 @@ startWorld = MkWorld
     (0, 0)
     Blank
     True
+
+
+
+type Grid a = [[a]]
+
+gridMap :: (a -> b) -> Grid a -> Grid b
+gridMap f = map (map f)
+
+
+cols :: [Color]
+cols = [black, red, orange, yellow, white]
 
 -- How to get from a fixed grid of 2-D floating point to adjustable fractals/pictures:
     -- 1.  Initialise world
