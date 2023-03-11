@@ -28,6 +28,7 @@ pointToPicture ((x, y), c) = Translate x y $ Color c $ Circle 1
 
 
 -- | Default color list
+--   https://colorswall.com/palette/128774
 colorList :: [Color]
 colorList = [makeColorI (rgb' !! 0) (rgb' !! 1) (rgb' !! 2) 1 | rgb' <- rgb ]
             where rgb = [[43, 192, 232], [246, 203, 102], [72, 68, 152], 
