@@ -63,8 +63,10 @@ getEscapeSteps n grid = gridMap ( length              -- the amount of unescaped
                                 ) grid                -- the sequenced grid 
   where
     -- | Given a point, calculate whether it's close enough to the fractal interior
+    --   zx or zy can also be either NaN or Infinity
     crossThreshold :: Point -> Bool
-    crossThreshold (zx, zy) = (zx ** 2 + zy ** 2) < 100
+    crossThreshold (zx, zy) = if (isNaN zx) || (isNaN zy) then False
+                              else (zx ** 2 + zy ** 2) < 100
 
 
 
