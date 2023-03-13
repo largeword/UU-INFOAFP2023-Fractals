@@ -42,9 +42,9 @@ getColors colors grid = let grid' = rescaleGrid2ColorRange colors grid
 --   https://intellipaat.com/community/33375/convert-a-number-range-to-another-range-maintaining-the-ratio
 rescaleGrid2ColorRange :: [Color] -> Grid Int -> Grid Float
 rescaleGrid2ColorRange colors grid = 
-  let gridMax  = int2Float . maximum    . map maximum $ grid
-      gridMin  = int2Float . minimum    . map minimum $ grid
-      colMax   = int2Float . subtract 1 . length      $ colors
+  let gridMax  = int2Float . maximum    . concat $ grid
+      gridMin  = int2Float . minimum    . concat $ grid
+      colMax   = int2Float . subtract 1 . length $ colors
       f        = \x -> ((int2Float x) - gridMin)  * (colMax) / (gridMax - gridMin)
 
    in gridMap f grid
@@ -53,8 +53,11 @@ rescaleGrid2ColorRange colors grid =
 -- | This function takes a color list and a float number, then find the nearest two colors in the list 
 --   according to float as index, and mix these colors with the right proportion
 float2Color :: [Color] -> Float -> Color
-float2Color colors x = let mixProportion = (x -) . int2Float . floor $ x
+float2Color colors x = let x' = if isNaN x then 0 else x 
+                           floorX = floor x'
+                           ceilingX = ceiling x'
+                           mixProportion = (x' -) . int2Float $ floorX
                         in mixColors mixProportion
                                      (1 - mixProportion)
-                                     (colorList !! (floor x)) 
-                                     (colorList !! (ceiling x))
+                                     (colorList !! floorX) 
+                                     (colorList !! ceilingX)
