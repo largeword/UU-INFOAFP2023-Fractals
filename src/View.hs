@@ -10,7 +10,7 @@ import Debug.Trace
 
 
 drawHandler :: World -> Picture
-drawHandler (MkWorld _ _ _ _ p _) = p
+drawHandler (MkWorld _ _ _ _ _ p _) = p
 
 
 -- | Function called in the last step of the step
