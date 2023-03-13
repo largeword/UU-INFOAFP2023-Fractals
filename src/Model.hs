@@ -33,7 +33,7 @@ startWorld = MkWorld
     [[(fromIntegral $ x - halfScrW, fromIntegral $ y - halfScrH) | x <- [0..screenWidth-1]] | y <- [0..screenHeight-1]]
     (GenData (0,0))
     []
-    1
+    (1 / 125)
     (0, 0)
     Blank
     True

@@ -5,13 +5,12 @@ import View
 import Generator
 
 import Data.List
+import Data.Ord hiding (Down)
 
 import Graphics.Gloss hiding (scale)
 import Graphics.Gloss.Interface.IO.Interact hiding (scale)
 
 import Debug.Trace
-import Data.List
-import Data.Ord
 
 
 -- | InputHandler is responsible for all inputs that happen
@@ -33,14 +32,14 @@ inputHandler (EventKey (MouseButton LeftButton) Down _ (x, y)) w =
 inputHandler e@(EventKey _ Down _ _) w =
   case parseEvent e of 
     Nothing -> w
-    Just ev -> w {inputEvents = ev : inputEvents w}
+    Just ev -> w {inputEvents = ev : inputEvents w, isChanged = True}
 
 -- | The second case matches on a button let *Up*,
 --   in which case we remove the event from the list
 inputHandler e@(EventKey _ Up   _ _) w = 
   case parseEvent e of
     Nothing -> w
-    Just ev -> w {inputEvents = delete ev $ inputEvents w}
+    Just ev -> w {inputEvents = delete ev $ inputEvents w, isChanged = True}
 
 -- | Lastly, wildcard pattern returns the input world
 inputHandler _ w = w
@@ -77,7 +76,7 @@ stepHandler _ w@(MkWorld screen d es z t _ True) = trace "Rendering... please ho
     let (z', t') = eventStep es (z, t)
         picture  = draw screen          -- turned into a pretty picture 'v'
                  . getColors colorList  -- turned into colored grid    :: Grid Color
-                 . getEscapeSteps 100   -- turned into numbered grid   :: Grid Int
+                 . getEscapeSteps 10   -- turned into numbered grid   :: Grid Int
                  . getSequences d       -- turned into sequenced grid  :: Grid [Point]
                  . (`scale` (z', t'))   -- Scaled to our parameters    :: Grid Point
                  $ screen               -- The unscaled default screen :: Grid Point
@@ -87,19 +86,21 @@ stepHandler _ w@(MkWorld screen d es z t _ True) = trace "Rendering... please ho
           , isChanged = not $ null es }   -- whether there are still event actions
 
 -- | Default case - nothing is changed
-stepHandler _ w = trace (show (inputEvents w)) $ w
+stepHandler _ w = w
 
 
 eventStep :: [EventAction] -> (Float, (Float, Float)) -> (Float, (Float, Float))
 eventStep es transf = foldr doEvent transf es
   where
     doEvent :: EventAction -> (Float, (Float, Float)) -> (Float, (Float, Float))
-    doEvent (Move Up'   ) (z, (tx, ty)) = (z     , (tx         , ty + 50 / z))
-    doEvent (Move Left' ) (z, (tx, ty)) = (z     , (tx - 50 / z, ty         ))
-    doEvent (Move Down' ) (z, (tx, ty)) = (z     , (tx         , ty - 50 / z))
-    doEvent (Move Right') (z, (tx, ty)) = (z     , (tx + 50 / z, ty         ))
-    doEvent (Zoom In    ) (z, (tx, ty)) = (z + 50, (tx         , ty         ))
-    doEvent (Zoom Out   ) (z, (tx, ty)) = (z - 50, (tx         , ty         ))
+    doEvent (Move Up'   ) (z, (tx, ty)) = (z     , (tx         , ty + tf / z))
+    doEvent (Move Left' ) (z, (tx, ty)) = (z     , (tx - tf / z, ty         ))
+    doEvent (Move Down' ) (z, (tx, ty)) = (z     , (tx         , ty - tf / z))
+    doEvent (Move Right') (z, (tx, ty)) = (z     , (tx + tf / z, ty         ))
+    doEvent (Zoom In    ) (z, (tx, ty)) = (z / zf, (tx         , ty         ))
+    doEvent (Zoom Out   ) (z, (tx, ty)) = (z * zf, (tx         , ty         ))
+    zf = 1.5
+    tf = 250
     
 
 
