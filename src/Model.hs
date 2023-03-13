@@ -22,7 +22,7 @@ data World = MkWorld
   { screen         :: Grid Point
   , inputEvents    :: [Event]  
   , zoomScaling    :: Float
-  , translation    :: (Int, Int)
+  , translation    :: (Float, Float)
   , currentPicture :: Picture  
   , isChanged      :: Bool
 }
