@@ -42,9 +42,9 @@ getColors colors grid = let grid' = rescaleGrid2ColorRange colors grid
 --   https://intellipaat.com/community/33375/convert-a-number-range-to-another-range-maintaining-the-ratio
 rescaleGrid2ColorRange :: [Color] -> Grid Int -> Grid Float
 rescaleGrid2ColorRange colors grid = 
-  let gridMax  = int2Float . maximum    . concat $ grid
-      gridMin  = int2Float . minimum    . concat $ grid
-      colMax   = int2Float . subtract 1 . length $ colors
+  let gridMax  = int2Float . maximum    . map maximum $ grid
+      gridMin  = int2Float . minimum    . map minimum $ grid
+      colMax   = int2Float . subtract 1 . length      $ colors
       f        = \x -> ((int2Float x) - gridMin)  * (colMax) / (gridMax - gridMin)
 
    in gridMap f grid

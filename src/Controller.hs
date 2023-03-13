@@ -10,6 +10,8 @@ import Graphics.Gloss hiding (scale)
 import Graphics.Gloss.Interface.IO.Interact hiding (scale)
 
 import Debug.Trace
+import Data.List
+import Data.Ord
 
 
 -- | InputHandler is responsible for all inputs that happen
@@ -102,15 +104,19 @@ eventStep es transf = foldr doEvent transf es
 
 
 
--- | Simple default scale function
---   it only does the zooming right now, and not even that well tbh
+-- | Perform linear transformation with given zooming scale, r offset, i offset.
 scale :: Grid Point -> (Float, (Float, Float)) -> Grid Point
-scale grid _ = gridMap f grid
+scale grid (zoom, (rOff, iOff)) = gridMap f grid
   where
     f :: Point -> Point
-    f (r, i) = (r * z, i * z)
-    z = 1 / 125
+    f (r, i) = (r * zoom + rOff, i * zoom + iOff)
 
+{- The following expression is used to get Min and Max for Grid Point
+xOldMin = minimumBy (comparing (!!0)) grid
+xOldMax = maximumBy (comparing (!!0)) grid
+yOldMin = minimumBy (comparing (!!1)) grid
+yOldMax = maximumBy (comparing (!!1)) grid
+-}
 
 
 
