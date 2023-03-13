@@ -20,22 +20,29 @@ halfScrH = screenHeight `div` 2
 -- Data types regarding the representation and calculation of fractals
 data World = MkWorld 
   { screen         :: Grid Point
+  , gData          :: GeneratorData
   , inputEvents    :: [Event]  
   , zoomScaling    :: Float
   , translation    :: (Int, Int)
   , currentPicture :: Picture  
   , isChanged      :: Bool
-}
+  }
 
 startWorld :: World
 startWorld = MkWorld
     [[(fromIntegral $ x - halfScrW, fromIntegral $ y - halfScrH) | x <- [0..screenWidth-1]] | y <- [0..screenHeight-1]]
+    (GenData (0,0))
     []
     1
     (0, 0)
     Blank
     True
 
+
+data GeneratorData = GenData
+  { position :: (Float, Float)
+
+  }
 
 
 type Grid a = [[a]]

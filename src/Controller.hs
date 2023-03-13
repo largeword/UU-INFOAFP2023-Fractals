@@ -16,11 +16,11 @@ inputHandler _ w = w
 --   We compute and render the fractal in here,
 --   only if our boolean flag is set to True
 stepHandler :: Float -> World -> World
-stepHandler _ w@(MkWorld screen _ z t _ True) =
+stepHandler _ w@(MkWorld screen d _ z t _ True) = (trace "Rendering.. please hold..") $
     let picture = draw screen          -- turned into a pretty picture 'v'
                 . getColors colorList  -- turned into colored grid    :: Grid Color
                 . getEscapeSteps 100   -- turned into numbered grid   :: Grid Int
-                . getSequences         -- turned into sequenced grid  :: Grid [Point]
+                . getSequences d       -- turned into sequenced grid  :: Grid [Point]
                 . (`scale` (z, t))     -- Scaled to our parameters    :: Grid Point
                 $ screen               -- The unscaled default screen :: Grid Point
      in w { currentPicture = picture, isChanged = False }

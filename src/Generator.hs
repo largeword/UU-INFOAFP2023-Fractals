@@ -34,10 +34,10 @@ getIterations zf (z, c) = iterate (`zf` c) z
 ------ Temporary ----------------
 
 -- generate iterations of a fixed-z
-fixedC :: Point -> [Point]
-fixedC z = getIterations nextZDefault (z, c)
+fixedC :: GeneratorData -> Point -> [Point]
+fixedC d z = getIterations nextZDefault (z, c)
   where
-      c = (0, 0)
+      c = position d
 
 -- generate iterations of a fixed-c
 fixedZ :: Point -> [Point]
@@ -49,8 +49,8 @@ fixedZ c = getIterations nextZDefault (z, c)
 
 
 -- | Given a scaled grid, compute the sequences of iterations
-getSequences :: Grid Point -> Grid [Point]
-getSequences grid = gridMap fixedZ grid
+getSequences :: GeneratorData -> Grid Point -> Grid [Point]
+getSequences d grid = gridMap (fixedC d) grid
 
 
 -- | Given a sequenced grid and a step treshold n,
