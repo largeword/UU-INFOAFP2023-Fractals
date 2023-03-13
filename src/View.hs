@@ -53,7 +53,7 @@ rescaleGrid2ColorRange colors grid =
 -- | This function takes a color list and a float number, then find the nearest two colors in the list 
 --   according to float as index, and mix these colors with the right proportion
 float2Color :: [Color] -> Float -> Color
-float2Color colors x = let x' = if isNaN x then 0 else x 
+float2Color colors x = let x' = if isNaN x then int2Float (length colors - 1) else x  -- If NaN, it means no steps are escaping 
                            floorX = floor x'
                            ceilingX = ceiling x'
                            mixProportion = (x' -) . int2Float $ floorX
