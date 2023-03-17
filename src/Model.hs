@@ -13,11 +13,33 @@ screenHeight = 500
 halfScrW :: Int
 halfScrW = screenWidth `div` 2
 
-halfScrH :: Int
+halfScrH :: Int 
 halfScrH = screenHeight `div` 2
 
-
 -- Data types regarding the representation and calculation of fractals
+
+-- | Describes what kind of fractal will be generated
+data Fractal = MBrot              
+             | Julia
+            --  | BurnedShip 
+            --  | Newton/Nova 
+-- what would happen if we change the degree of the Mandelbrot function?
+
+-- | Contains all information necessary to compute a fractal with a ZFunction
+data GeneratorData = GenData
+  { position         :: Point            -- other name for z in fractal function?
+  , escapeRadius     :: Int              -- other name for c in fractal function?
+  , cplexParam       :: Point
+  , fractalType      :: Fractal        
+  , degree           :: Int              -- degree n of polynomial ZFunction
+  -- , hasConstPosition :: Bool             -- if True then escapeRadius will be varied
+                                         -- by the ZFunction, otherwise its position
+                                         -- (then the escapeRadius will be kept constant)
+                                         -- something that is only necessary when dealing
+                                         -- with Nova fractals  
+  }
+  -- do we want decimal degrees? like z^1.5?
+
 data World = MkWorld 
   { screen         :: Grid Point
   , gData          :: GeneratorData
@@ -31,19 +53,12 @@ data World = MkWorld
 startWorld :: World
 startWorld = MkWorld
     [[(fromIntegral $ x - halfScrW, fromIntegral $ y - halfScrH) | x <- [0..screenWidth-1]] | y <- [0..screenHeight-1]]
-    (GenData (0,0))
+    (GenData { position = (0,0), escapeRadius = 100, cplexParam = (0,0), fractalType = MBrot, degree = 2 })
     []
     1
     (0, 0)
     Blank
     True
-
-
-data GeneratorData = GenData
-  { position :: (Float, Float)
-
-  }
-
 
 type Grid a = [[a]]
 
