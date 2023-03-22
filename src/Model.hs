@@ -2,6 +2,7 @@ module Model where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
+import GHC.Float (int2Float)
 
 -- Separate properties of the screen
 screenWidth :: Int
@@ -16,14 +17,18 @@ halfScrW = screenWidth `div` 2
 halfScrH :: Int
 halfScrH = screenHeight `div` 2
 
+scaleFactor :: Float
+scaleFactor = 1.0 / (0.25 * int2Float screenWidth)
+
+
+type ZoomScale = Float
+type Translation = (Float, Float)
 
 -- Data types regarding the representation and calculation of fractals
 data World = MkWorld 
   { screen         :: Grid Point
   , gData          :: GeneratorData
-  , inputEvents    :: [EventAction]  
-  , zoomScaling    :: Float
-  , translation    :: (Float, Float)
+  , transform      :: (ZoomScale, Translation)
   , currentPicture :: Picture  
   , isChanged      :: Bool
   }
@@ -32,9 +37,7 @@ startWorld :: World
 startWorld = MkWorld
     [[(fromIntegral $ x - halfScrW, fromIntegral $ y - halfScrH) | x <- [0..screenWidth-1]] | y <- [0..screenHeight-1]]
     (GenData (0,0))
-    []
-    (1 / 125)
-    (0, 0)
+    (1, (0, 0))
     Blank
     True
 

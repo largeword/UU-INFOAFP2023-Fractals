@@ -24,6 +24,7 @@ inputHandler :: Event -> World -> World
 inputHandler (EventKey (MouseButton LeftButton) Down _ (x, y)) w = 
   let newData = GenData (x / 125, y / 125)
    in w {gData = newData, isChanged = True}
+inputHandler (EventKey (Char        'r'       ) Down _ _     ) w = w {isChanged = True}
 
 -- | This is a case for events that happen every tick, as long as a button is held
 --   Such as moving using the buttons
@@ -32,14 +33,9 @@ inputHandler (EventKey (MouseButton LeftButton) Down _ (x, y)) w =
 inputHandler e@(EventKey _ Down _ _) w =
   case parseEvent e of 
     Nothing -> w
-    Just ev -> w {inputEvents = ev : inputEvents w, isChanged = True}
-
--- | The second case matches on a button let *Up*,
---   in which case we remove the event from the list
-inputHandler e@(EventKey _ Up   _ _) w = 
-  case parseEvent e of
-    Nothing -> w
-    Just ev -> w {inputEvents = delete ev $ inputEvents w, isChanged = True}
+    Just ev -> let tf = doEvent ev (transform w)
+                in w { transform = tf
+                     , isChanged = True }
 
 -- | Lastly, wildcard pattern returns the input world
 inputHandler _ w = w
@@ -72,53 +68,46 @@ parseEvent                 _ =  Nothing
 --   We compute and render the fractal in here,
 --   only if our boolean flag is set to True
 stepHandler :: Float -> World -> World
-stepHandler _ w@(MkWorld screen d es z t _ True) = trace "Rendering... please hold..." $
-    let (z', t') = eventStep es (z, t)
-        picture  = draw screen          -- turned into a pretty picture 'v'
-                 . getColors colorList  -- turned into colored grid    :: Grid Color
-                 . getEscapeSteps 10   -- turned into numbered grid   :: Grid Int
-                 . getSequences d       -- turned into sequenced grid  :: Grid [Point]
-                 . (`scale` (z', t'))   -- Scaled to our parameters    :: Grid Point
-                 $ screen               -- The unscaled default screen :: Grid Point
-     in w { zoomScaling = z'
-          , translation = t'
-          , currentPicture = picture
-          , isChanged = not $ null es }   -- whether there are still event actions
+stepHandler _ w@(MkWorld screen d tf _ True) =
+  let picture  = draw screen          -- turned into a pretty picture 'v'
+               . getColors colorList  -- turned into colored grid    :: Grid Color
+               . getEscapeSteps 10    -- turned into numbered grid   :: Grid Int
+               . getSequences d       -- turned into sequenced grid  :: Grid [Point]
+               . (`scale` tf)         -- Scaled to our parameters    :: Grid Point
+               $ screen               -- The unscaled default screen :: Grid Point
+   in w { currentPicture = picture
+        , isChanged      = False }
 
 -- | Default case - nothing is changed
 stepHandler _ w = w
 
 
-eventStep :: [EventAction] -> (Float, (Float, Float)) -> (Float, (Float, Float))
+eventStep :: [EventAction] -> (ZoomScale, Translation) -> (ZoomScale, Translation)
 eventStep es transf = foldr doEvent transf es
-  where
-    doEvent :: EventAction -> (Float, (Float, Float)) -> (Float, (Float, Float))
-    doEvent (Move Up'   ) (z, (tx, ty)) = (z     , (tx         , ty + tf / z))
-    doEvent (Move Left' ) (z, (tx, ty)) = (z     , (tx - tf / z, ty         ))
-    doEvent (Move Down' ) (z, (tx, ty)) = (z     , (tx         , ty - tf / z))
-    doEvent (Move Right') (z, (tx, ty)) = (z     , (tx + tf / z, ty         ))
-    doEvent (Zoom In    ) (z, (tx, ty)) = (z / zf, (tx         , ty         ))
-    doEvent (Zoom Out   ) (z, (tx, ty)) = (z * zf, (tx         , ty         ))
-    zf = 1.5
-    tf = 250
+
+doEvent :: EventAction -> (ZoomScale, Translation) -> (ZoomScale, Translation)
+doEvent e (z, (tx, ty)) = case e of
+  Move Up'   -> (z     , (tx     , ty + fy))
+  Move Left' -> (z     , (tx - fx, ty     ))
+  Move Down' -> (z     , (tx     , ty - fy))
+  Move Right'-> (z     , (tx + fx, ty     ))
+  Zoom In    -> (z - zf, (tx     , ty     ))
+  Zoom Out   -> (z + zf, (tx     , ty     ))
+  where    
+    zf = 0.1
+    fx = 0.001 / (z * scaleFactor)
+    fy = 0.001 / (z * scaleFactor)
     
 
 
 
 -- | Perform linear transformation with given zooming scale, r offset, i offset.
-scale :: Grid Point -> (Float, (Float, Float)) -> Grid Point
+scale :: Grid Point -> (ZoomScale, Translation) -> Grid Point
 scale grid (zoom, (rOff, iOff)) = gridMap f grid
   where
     f :: Point -> Point
-    f (r, i) = (r * zoom + rOff, i * zoom + iOff)
-
-{- The following expression is used to get Min and Max for Grid Point
-xOldMin = minimumBy (comparing (!!0)) grid
-xOldMax = maximumBy (comparing (!!0)) grid
-yOldMin = minimumBy (comparing (!!1)) grid
-yOldMax = maximumBy (comparing (!!1)) grid
--}
-
+    f (r, i) = (r * zoom' + rOff, i * zoom' + iOff)
+    zoom' = zoom * scaleFactor
 
 
 
