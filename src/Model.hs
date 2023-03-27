@@ -16,29 +16,28 @@ halfScrW = screenWidth `div` 2
 halfScrH :: Int 
 halfScrH = screenHeight `div` 2
 
--- Data types regarding the representation and calculation of fractals
+---- Data types regarding the representation and calculation of fractals
 
--- | Describes what kind of fractal will be generated
-data Fractal = MBrot              
-             | Julia
-            --  | BurnedShip 
-            --  | Newton/Nova 
--- what would happen if we change the degree of the Mandelbrot function?
+-- | A type synonym to define the abstract point calculation function
+--  The first argument is the starting point z and the second the complex parameter c
+type Z = Point
+type C = Point
+
+type FractalFunction = Z -> C -> Point  
+
+-- | Describes which function parameter will be varied in the fractal generation function
+data VarParameter = VarZ 
+                  | VarC 
+                  | VarZandC
 
 -- | Contains all information necessary to compute a fractal with a ZFunction
 data GeneratorData = GenData
   { position         :: Point            -- other name for z in fractal function?
-  , escapeRadius     :: Int              -- other name for c in fractal function?
-  , cplexParam       :: Point
-  , fractalType      :: Fractal        
-  , degree           :: Int              -- degree n of polynomial ZFunction
-  -- , hasConstPosition :: Bool             -- if True then escapeRadius will be varied
-                                         -- by the ZFunction, otherwise its position
-                                         -- (then the escapeRadius will be kept constant)
-                                         -- something that is only necessary when dealing
-                                         -- with Nova fractals  
+  , offset           :: Point            -- offset c in the fractal polynomial
+  , escapeRadius     :: Int              -- TO BE EXPLAINED 
+  , parameter        :: VarParameter 
+  , func             :: FractalFunction       
   }
-  -- do we want decimal degrees? like z^1.5?
 
 data World = MkWorld 
   { screen         :: Grid Point
@@ -50,22 +49,47 @@ data World = MkWorld
   , isChanged      :: Bool
   }
 
-startWorld :: World
-startWorld = MkWorld
-    [[(fromIntegral $ x - halfScrW, fromIntegral $ y - halfScrH) | x <- [0..screenWidth-1]] | y <- [0..screenHeight-1]]
-    (GenData { position = (0,0), escapeRadius = 100, cplexParam = (0,0), fractalType = MBrot, degree = 2 })
-    []
-    1
-    (0, 0)
-    Blank
-    True
+  
+
+
+---- Functions for generating the fractal
+
+-- | Create the fractal characteristic function based on user input
+-- First input argument: take absolute of starting point (|Re(z)| + |Im(z)|)^n + c if True 
+-- Second: degree n of the polynomial z^n + c 
+
+makeFractalFunction :: Bool -> Int -> FractalFunction
+makeFractalFunction isAbs degree            -- do we want decimal degrees? like z^1.5?
+  = let  
+      -- poly :: Point -> Point    
+      poly (zReal, zImag) = if isAbs then computePolynomial (abs zReal, abs zImag) degree 
+                                     else computePolynomial (zReal, zImag) degree 
+      -- fractalpoint :: Point -> Point -> Point
+      fractalPoint (zReal', zImag') (cReal, cImag) = (zReal' + cReal, zImag' + cImag) 
+    in  
+      fractalPoint . poly                  
+  
+
+-- | compute polynomial values given a complex number z = Re(z) + Im(z),
+-- for now we assume that degree n is a positive integer 
+computePolynomial :: Point -> Int -> Point
+computePolynomial z 1 = z  
+computePolynomial z n | n <= 0    = error ("Non-positive number given as argument: " ++ 
+                                           show n ++ ". Please give a positive number") 
+                      | even n    = computePolynomial (complexMul z z) (n `div` 2)
+                      | otherwise = complexMul z $ computePolynomial z (n-1)
+
+
+---- UTILITIES ----
+
+complexMul :: Point -> Point -> Point
+complexMul (a, b) (c, d) = ( a * c - b * d
+                           , a * d + b * c )
 
 type Grid a = [[a]]
 
 gridMap :: (a -> b) -> Grid a -> Grid b
 gridMap f = map (map f)
-
-
 
 -- | Default color list
 --   https://colorswall.com/palette/128774
