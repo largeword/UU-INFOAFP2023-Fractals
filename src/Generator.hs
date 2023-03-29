@@ -8,49 +8,26 @@ import Data.Function
 
 import Model
 
+-- | Computes a fractal pattern based on fractal meta data and a given point
+generateFractal :: GeneratorData -> Point -> [Point] 
+generateFractal genData pt = case parameter genData of
+  VarZ -> computeFractal genData {position = pt} 
+  VarC -> computeFractal genData {offset   = pt}
+  _    -> error "Other functionalities are not yet defined."    
 
--- | A type synonym to define the abstract point calculation function
---   Hopefully, we may be able to allow users to define their own version of this
---   The first argument is the z, the second is the c
-type ZFunction = Point -> Point -> Point
-
-
--- | Default implementation of the fractal formula
---   Defines the function z' = z^2 + c
-nextZDefault :: ZFunction
-nextZDefault (zr, zi) (cr, ci) = let (z2r, z2i) = ( zr ** 2 - zi ** 2    -- real
-                                                  , 2 * zr * zi       )  -- imag
-                                  in ( z2r + cr    -- real
-                                     , z2i + ci )  -- imag
-
-
--- | Generates a list of length n, defining the iterations
---   according to the ZFunction provided
-getIterations :: ZFunction -> (Point, Point) -> [Point]
-getIterations zf (z, c) = iterate (`zf` c) z
-
-
-
------- Temporary ----------------
-
--- generate iterations of a fixed-z
-fixedC :: GeneratorData -> Point -> [Point]
-fixedC d z = getIterations nextZDefault (z, c)
-  where
-      c = position d
-
--- generate iterations of a fixed-c
-fixedZ :: Point -> [Point]
-fixedZ c = getIterations nextZDefault (z, c)
-  where
-      z = (0, 0)
-
-----------------------------------
-
+-- | Generates the infinite fractal set, defining the iterations
+--   according to the generation data provided
+computeFractal :: GeneratorData -> [Point]
+computeFractal genData = let fracFunc = func     genData 
+                             c        = offset   genData
+                             z        = position genData
+                         in 
+                           iterate (`fracFunc` c) z
+                            
 
 -- | Given a scaled grid, compute the sequences of iterations
 getSequences :: GeneratorData -> Grid Point -> Grid [Point]
-getSequences d grid = gridMap (fixedC d) grid
+getSequences genData grid = gridMap (generateFractal genData) grid
 
 
 -- | Given a sequenced grid and a step treshold n,
