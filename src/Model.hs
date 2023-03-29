@@ -44,8 +44,8 @@ data GeneratorData = GenData
   , offset           :: Point            -- offset c in the fractal polynomial
   , escapeRadius     :: Int              -- TO BE EXPLAINED 
   , parameter        :: VarParameter 
-  , func             :: FractalFunction       
-  }
+  , func             :: !FractalFunction -- Strictness required to ensure we do not calculate  
+  }                                      -- the same function every iteration
 
 data World = MkWorld 
   { screen         :: Grid Point

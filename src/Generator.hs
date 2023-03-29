@@ -27,17 +27,18 @@ computeFractal genData = let fracFunc = func     genData
 
 -- | Given a scaled grid, compute the sequences of iterations
 getSequences :: GeneratorData -> Grid Point -> Grid [Point]
-getSequences genData grid = gridMap (generateFractal genData) grid
+getSequences genData grid = gridMap ( take (escapeRadius genData) -- limit the infinite sequence
+                                    . generateFractal genData     -- generate infinite sequence
+                                    ) grid                        -- the grid of points
 
 
--- | Given a sequenced grid and a step treshold n,
+-- | Given a sequenced grid
 --   compute the steps in which the point escapes the treshold
-getEscapeSteps :: Int -> Grid [Point] -> Grid Int
-getEscapeSteps n grid = gridMap ( length              -- the amount of unescaped values
-                                . filter (== True)    -- discard all escaped values
-                                . map crossThreshold  -- convert the sequence to bools
-                                . take n              -- limit the size of the sequence
-                                ) grid                -- the sequenced grid 
+getEscapeSteps :: Grid [Point] -> Grid Int
+getEscapeSteps grid = gridMap ( length              -- the amount of unescaped values
+                              . filter (== True)    -- discard all escaped values
+                              . map crossThreshold  -- convert the sequence to bools
+                              ) grid                -- the sequenced grid 
   where
     -- | Given a point, calculate whether it's close enough to the fractal interior
     --   zx or zy can also be either NaN or Infinity
