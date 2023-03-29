@@ -22,7 +22,7 @@ inputHandler :: Event -> World -> World
 --   Such as selecting a point for which to generate the Julia
 --   or (potentially in the future) using the mousewheel to zoom
 inputHandler (EventKey (MouseButton LeftButton) Down _ (x, y)) w = 
-  let newData = GenData (x / 125, y / 125)
+  let newData = (gData w) { offset = (x / 125, y / 125)}
    in w {gData = newData, isChanged = True}
 inputHandler (EventKey (Char        'r'       ) Down _ _     ) w = w {isChanged = True}
 
