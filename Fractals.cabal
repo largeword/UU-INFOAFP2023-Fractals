@@ -32,6 +32,7 @@ executable Fractals
                  ,    Model
                  ,    View
                  ,    Generator
+                 ,    Console
                  
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -39,7 +40,18 @@ executable Fractals
                  ,    gloss
                  ,    random
                  ,    split
+                 ,    accelerate
+                 ,    accelerate-llvm
+                 ,    accelerate-llvm-native
+                 ,    accelerate-llvm-ptx
+                 ,    llvm-hs
+                 ,    llvm-hs-pure
+                 ,    libffi == 0.1
+    
     hs-source-dirs:   src
+    
     default-language: Haskell2010
+    
     -- eneble debugging by running $ cabal configure --enable-profiling --profiling-detail toplevel-functions
     -- ghc-options:      -prof -fprof-auto -with-rtsopts=-xc
+    

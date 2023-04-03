@@ -5,8 +5,8 @@ import Controller
 import View
 import Console
 
-import Graphics.Gloss
-import Graphics.Gloss.Interface.IO.Interact
+import Graphics.Gloss hiding (Vector)
+import Graphics.Gloss.Interface.IO.Interact hiding (Vector)
 import Debug.Trace
 
 main :: IO ()

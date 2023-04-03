@@ -1,0 +1,40 @@
+packages: .
+with-compiler: /home/luxinliang/.ghcup/ghc/9.0.2/bin/ghc
+
+-- source-repository-package
+--     type: git
+--     location: https://github.com/AccelerateHS/accelerate
+--     tag: 5971c5d8e4dbba28d2017e7ce422cf46a20197cb
+
+-- source-repository-package
+--     type: git
+--     location: https://github.com/largeword/accelerate-llvm
+--     tag: a9120cf27af484262c719d34034950036ecc45e2
+--     subdir: accelerate-llvm accelerate-llvm-native accelerate-llvm-ptx
+
+-- source-repository-package
+--     type: git
+--     location: https://github.com/largeword/llvm-hs
+--     tag: a9ddc8a6758ee813efc7356ab0df7992096da606
+--     subdir: llvm-hs-pure llvm-hs
+
+source-repository-package
+    type: git
+    location: https://github.com/AccelerateHS/accelerate
+    tag: 5971c5d8e4dbba28d2017e7ce422cf46a20197cb
+
+source-repository-package
+    type: git
+    location: https://github.com/AccelerateHS/accelerate-llvm
+    tag: 2cd65569c875477b5250d54f0d0738d8ee28e597
+    subdir: accelerate-llvm accelerate-llvm-native accelerate-llvm-ptx
+
+source-repository-package
+    type: git
+    location: https://github.com/llvm-hs/llvm-hs
+    tag: 423220bffac4990d019fc088c46c5f25310d5a33
+    subdir: llvm-hs-pure llvm-hs
+
+-- allow-newer: all
+allow-newer: bytestring
+-- with-ghc: 9.0.2
