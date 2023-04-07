@@ -1,4 +1,14 @@
-module ViewAcc (drawHandler, draw, getColors) where
+{-# LANGUAGE DeriveAnyClass, 
+             DeriveGeneric, 
+             FlexibleContexts, 
+             TypeFamilies, 
+             TypeOperators, 
+             FlexibleContexts, 
+             StandaloneDeriving, 
+             UndecidableInstances, 
+             AllowAmbiguousTypes #-}
+
+module ViewAcc (drawHandler, draw, getColorsAcc) where
 
 import ModelAcc
 
@@ -6,7 +16,7 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
 
-import Debug.Trace
+import Data.Array.Accelerate              as A
 
 
 drawHandler :: World -> Picture
@@ -18,9 +28,9 @@ drawHandler (MkWorld _ _ _ p _) = p
 --   By zipping them together we can easily map pointToPicture over them
 --   Then the result is condensed into a single picture
 draw :: Grid Point -> Grid Color -> Picture
-draw screen cols = let pointAndColour = zipWith zip screen cols
+draw screen cols = let pointAndColour = Prelude.zipWith Prelude.zip screen cols
                        pics           = gridMap pointToPicture pointAndColour
-                    in Pictures . map Pictures $ pics
+                    in Pictures . Prelude.map Pictures $ pics
 
 -- | Very simple: generate a pixel point, and give it the right colour and translation
 --   Because the translation is wrt the screen coordinates as opposed to view coordinates,
@@ -31,7 +41,7 @@ pointToPicture ((x, y), c) = Translate x y $ Color c $ Circle 1
 
 
 
-
+{-
 -- | This function maps the Grid of escaping steps into the corresponding colors
 getColors :: [Color] -> Grid Int -> Grid Color
 getColors colors grid = let grid' = rescaleGrid2ColorRange colors grid
@@ -61,4 +71,68 @@ float2Color colors x = let x' = if isNaN x then trace "NaN" $ int2Float (length 
                                      (1 - mixProportion)
                                      (colorList !! floorX) 
                                      (colorList !! ceilingX)
+-}
 
+
+-- R G B A, all values should be in [0..1]
+type ColorAcc = (Float, Float, Float, Float) --deriving (Show, Generic, Elt)
+
+
+getColorsAcc :: Acc (Array (A.Z :. Int) ColorAcc) 
+                -> Acc (Array ((A.Z :. Int) :. Int) Int) 
+                -> Acc (Array ((A.Z :. Int) :. Int) ColorAcc)
+getColorsAcc colorsAcc gridAcc = let grid' = rescaleGrid2ColorRangeAcc colorsAcc gridAcc
+                                 in A.map (float2ColorAcc colorsAcc) grid'
+
+
+rescaleGrid2ColorRangeAcc :: Acc (Array (A.Z :. Int) ColorAcc) 
+                             -> Acc (Array ((A.Z :. Int) :. Int) Int) 
+                             -> Acc (Array ((A.Z :. Int) :. Int) Float)
+rescaleGrid2ColorRangeAcc colorsAcc gridAcc = 
+  let gridAccFlat = A.flatten gridAcc
+      gridAccMax  = A.toFloating ((A.maximum gridAccFlat) A.!! 0) :: Exp Float
+      gridAccMin  = A.toFloating ((A.minimum gridAccFlat) A.!! 0) :: Exp Float
+      colMax      = A.toFloating . A.subtract 1 . A.length $ colorsAcc :: Exp Float 
+      f :: Exp Int -> Exp Float
+      f           = \x -> A.ifThenElse (gridAccMax A.== 0) 
+                                       (0.0) 
+                                       (((A.toFloating x) A.- gridAccMin)  A.* (colMax) A./ (gridAccMax - gridAccMin))
+   in A.map f gridAcc
+
+
+float2ColorAcc :: Acc (Array (A.Z :. Int) ColorAcc) -> Exp Float -> Exp ColorAcc
+float2ColorAcc colorsAcc x = let x' = A.ifThenElse (A.isNaN x) 
+                                                   (A.toFloating ((A.length colorsAcc) A.- 1)) 
+                                                   (x) :: Exp Float
+                                 floorX = A.floor x'
+                                 ceilingX = A.ceiling x'
+                                 mixProportion = (x' A.-) . A.toFloating $ floorX :: Exp Float
+                             in  mixColorsAcc mixProportion
+                                              (1 - mixProportion)
+                                              (colorsAcc A.!! floorX) 
+                                              (colorsAcc A.!! ceilingX)
+
+
+-- source: https://hackage.haskell.org/package/gloss-1.13.2.2/docs/src/Graphics.Gloss.Data.Color.html
+-- based on the original mixColor, make it fit with Acc Array
+-- arguments: Proportion of first color, Proportion of second color, First color, Second color
+-- returns: Resulting color
+mixColorsAcc :: Exp Float -> Exp Float -> Exp ColorAcc -> Exp ColorAcc -> Exp ColorAcc
+mixColorsAcc m1 m2 c1 c2 = let (T4 r1 g1 b1 a1) = c1
+                               (T4 r2 g2 b2 a2) = c2
+
+                               -- Normalise mixing proportions to ratios.
+                               m12 = m1 A.+ m2
+                               m1' = m1 A./ m12
+                               m2' = m2 A./ m12
+
+                               -- Colors components should be added via sum of squares,
+                               -- otherwise the result will be too dark.
+                               r1s = r1 A.* r1;    r2s = r2 A.* r2
+                               g1s = g1 A.* g1;    g2s = g2 A.* g2
+                               b1s = b1 A.* b1;    b2s = b2 A.* b2
+
+                           in  A.lift ((A.sqrt (m1' A.* r1s A.+ m2' A.* r2s)), 
+                                       (A.sqrt (m1' A.* g1s A.+ m2' A.* g2s)), 
+                                       (A.sqrt (m1' A.* b1s A.+ m2' A.* b2s)), 
+                                       ((m1 A.* a1   A.+ m2 A.* a2) A./ m12))

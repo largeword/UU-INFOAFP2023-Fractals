@@ -1,4 +1,12 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, FlexibleContexts, TypeFamilies, TypeOperators, FlexibleContexts #-}
+{-# LANGUAGE DeriveAnyClass, 
+             DeriveGeneric, 
+             FlexibleContexts, 
+             TypeFamilies, 
+             TypeOperators, 
+             FlexibleContexts, 
+             StandaloneDeriving, 
+             UndecidableInstances, 
+             AllowAmbiguousTypes #-}
 
 module GeneratorAcc (getSequencesAcc, getEscapeStepsAcc, grid2Arr, arr2Grid) where
 
@@ -59,7 +67,7 @@ getEscapeStepsAcc gridAcc = A.asnd $ (A.filter (A.== (lift True)) (A.map crossTh
 -- let mat = fromList (Z:.2:.2:.2) [(1,2),(101,200),(1,2),(100,2),(2,3),(100,30),(1,2),(23,45)]
 -- CPU.run $ A.map crossThreshouldAcc $ use mat
 crossThreshouldAcc :: Exp (Float, Float) -> Exp Bool
-crossThreshouldAcc point = ifThenElse ((A.isNaN zx) A.|| (A.isNaN zy)) 
+crossThreshouldAcc point = A.ifThenElse ((A.isNaN zx) A.|| (A.isNaN zy)) 
                               (lift False) 
                               ((zx A.** 2 + zy A.** 2) A.< 100)
                               where --(zx', zy') = unlift pointPair
