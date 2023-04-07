@@ -75,6 +75,7 @@ crossThreshouldAcc point = A.ifThenElse ((A.isNaN zx) A.|| (A.isNaN zy))
                                     zy = A.snd point
 
 
+-- source: https://hackage.haskell.org/package/accelerate-1.3.0.0/docs/src/Data.Array.Accelerate.Language.html
 -- get runExp function from Accelerate docs
 -- for getting shape from Array
 runExp :: Elt e => Exp e -> e

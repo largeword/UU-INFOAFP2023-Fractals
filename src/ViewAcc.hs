@@ -74,17 +74,19 @@ float2Color colors x = let x' = if isNaN x then trace "NaN" $ int2Float (length 
 -}
 
 
--- R G B A, all values should be in [0..1]
+-- | Arguments: Red Green Blue Alpha (all values should be in [0..1])
 type ColorAcc = (Float, Float, Float, Float) --deriving (Show, Generic, Elt)
 
 
+-- | This function is used to color every pixel based on their escaping step
 getColorsAcc :: Acc (Array (A.Z :. Int) ColorAcc) 
                 -> Acc (Array ((A.Z :. Int) :. Int) Int) 
                 -> Acc (Array ((A.Z :. Int) :. Int) ColorAcc)
 getColorsAcc colorsAcc gridAcc = let grid' = rescaleGrid2ColorRangeAcc colorsAcc gridAcc
-                                 in A.map (float2ColorAcc colorsAcc) grid'
+                                 in  A.map (float2ColorAcc colorsAcc) grid'
 
 
+-- | This function is used to rescale the escaping step into color index range
 rescaleGrid2ColorRangeAcc :: Acc (Array (A.Z :. Int) ColorAcc) 
                              -> Acc (Array ((A.Z :. Int) :. Int) Int) 
                              -> Acc (Array ((A.Z :. Int) :. Int) Float)
@@ -100,6 +102,8 @@ rescaleGrid2ColorRangeAcc colorsAcc gridAcc =
    in A.map f gridAcc
 
 
+-- | This function takes a color list and a float number, then find the nearest two colors in the list 
+--   according to float as index, and mix these colors with the right proportion
 float2ColorAcc :: Acc (Array (A.Z :. Int) ColorAcc) -> Exp Float -> Exp ColorAcc
 float2ColorAcc colorsAcc x = let x' = A.ifThenElse (A.isNaN x) 
                                                    (A.toFloating ((A.length colorsAcc) A.- 1)) 
@@ -113,10 +117,10 @@ float2ColorAcc colorsAcc x = let x' = A.ifThenElse (A.isNaN x)
                                               (colorsAcc A.!! ceilingX)
 
 
--- source: https://hackage.haskell.org/package/gloss-1.13.2.2/docs/src/Graphics.Gloss.Data.Color.html
--- based on the original mixColor, make it fit with Acc Array
--- arguments: Proportion of first color, Proportion of second color, First color, Second color
--- returns: Resulting color
+-- | Source: https://hackage.haskell.org/package/gloss-1.13.2.2/docs/src/Graphics.Gloss.Data.Color.html
+--   Based on the original mixColor, make it fit with Acc Array
+--   Arguments: Proportion of first color, Proportion of second color, First color, Second color
+--   Returns: Resulting color
 mixColorsAcc :: Exp Float -> Exp Float -> Exp ColorAcc -> Exp ColorAcc -> Exp ColorAcc
 mixColorsAcc m1 m2 c1 c2 = let (T4 r1 g1 b1 a1) = c1
                                (T4 r2 g2 b2 a2) = c2
