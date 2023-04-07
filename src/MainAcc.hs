@@ -1,13 +1,18 @@
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, FlexibleContexts, TypeFamilies, TypeOperators, FlexibleContexts #-}
+
 module Main where
 
-import Model
+import ModelAcc
 import ControllerAcc
-import View
+import ViewAcc
 import Console
 
 import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact hiding (Vector)
-import Debug.Trace
+
+--import Debug.Trace
+
+import Data.Array.Accelerate
 
 main :: IO ()
 main = play (InWindow "Fractals" (screenHeight, screenWidth) (0, 0))        -- Or Fullscreen
@@ -21,12 +26,17 @@ main = play (InWindow "Fractals" (screenHeight, screenWidth) (0, 0))        -- O
 
 startWorld :: World
 startWorld = MkWorld
-    [[(fromIntegral $ x - halfScrW, fromIntegral $ y - halfScrH) | x <- [0..screenWidth-1]] | y <- [0..screenHeight-1]]
+    worldMatrix
     (GenData { position = (0,0), escapeRadius = 100, parameter = VarZ, offset = (0,0), func = fracFunc})
     (1, (0, 0))
     Blank
     True
     where
-        fracFunc = makeFractalFunction False 2 
-        -- if 1st arg is True, then absolute value will be taken of z
-        -- second arg represents polynomial degree
+        fracFunc = makeFractalFunction False 2
+        worldMatrix = fromList (Z:.x:.y) flatList :: Matrix (Float, Float)
+          where  x = Prelude.length gridPoint
+                 y = Prelude.length (head gridPoint)
+                 flatList = concat gridPoint
+                 gridPoint = [[(Prelude.fromIntegral $ x - halfScrW, Prelude.fromIntegral $ y - halfScrH) 
+                              | x <- [0..screenWidth -1]] 
+                              | y <- [0..screenHeight-1]]
