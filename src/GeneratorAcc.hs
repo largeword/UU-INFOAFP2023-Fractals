@@ -65,6 +65,8 @@ getEscapeSteps grid = gridMap ( length              -- the amount of unescaped v
 
 
 -}
+
+-- get runExp function from official docs, for debugging
 runExp :: Elt e => Exp e -> e
 runExp e = indexArray (CPU.run (unit e)) Z
 

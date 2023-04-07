@@ -9,6 +9,7 @@ import Data.List.Split (chunksOf)
 
 type Grid a = [[a]]
 
+-- get runExp function from official docs, for debugging
 runExp :: Elt e => Exp e -> e
 runExp e = indexArray (CPU.run (unit e)) Z
 
