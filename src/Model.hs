@@ -3,6 +3,7 @@ module Model where
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
+import Data.Array.Accelerate
 
 -- Separate properties of the screen
 screenWidth :: Int
@@ -48,7 +49,7 @@ data GeneratorData = GenData
   }                                      -- the same function every iteration
 
 data World = MkWorld 
-  { screen         :: Grid Point
+  { screen         :: Matrix (Float, Float)
   , gData          :: GeneratorData
   , transform      :: (ZoomScale, Translation)
   , currentPicture :: Picture  

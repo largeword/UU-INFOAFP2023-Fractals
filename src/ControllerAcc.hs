@@ -76,28 +76,28 @@ parseEvent                 _ =  Nothing
 -- | Handles a single step in our world
 --   We compute and render the fractal in here,
 --   only if our boolean flag is set to True
-stepHandler :: Float -> World -> World
-stepHandler _ w@(MkWorld screen d tf _ True) =
-  let picture  = draw screen          -- turned into a pretty picture 'v'
-               . getColors colorList  -- turned into colored grid    :: Grid Color
-               . getEscapeSteps       -- turned into numbered grid   :: Grid Int
-               . getSequences d       -- turned into sequenced grid  :: Grid [Point]
-               . (`scale` tf)         -- Scaled to our parameters    :: Grid Point
-               $ screen               -- The unscaled default screen :: Grid Point
-   in w { currentPicture = picture
-        , isChanged      = False }
+-- stepHandler :: Float -> World -> World
+-- stepHandler _ w@(MkWorld screen d tf _ True) =
+--   let picture  = draw screen          -- turned into a pretty picture 'v'
+--                . getColors colorList  -- turned into colored grid    :: Grid Color
+--                . getEscapeSteps       -- turned into numbered grid   :: Grid Int
+--                . getSequences d       -- turned into sequenced grid  :: Grid [Point]
+--                . (`scale` tf)         -- Scaled to our parameters    :: Grid Point
+--                $ screen               -- The unscaled default screen :: Grid Point
+--    in w { currentPicture = picture
+--         , isChanged      = False }
 
--- | Default case - nothing is changed
-stepHandler _ w = w
+-- -- | Default case - nothing is changed
+-- stepHandler _ w = w
 
 stepHandlerAcc :: Float -> World -> World
 stepHandlerAcc _ w@(MkWorld screen d tf _ True) =
-  let picture  = draw screen          -- turned into a pretty picture 'v'
-               . getColors colorList  -- turned into colored grid    :: Grid Color
-               . GA.accArr2GridInt $ CPU.run $ GA.getEscapeStepsAcc      -- turned into numbered grid   :: Grid Float
-               . GA.getSequencesAcc2       -- turned into sequenced grid  :: Grid [Point]
-               . (`scaleAcc` tf)         -- Scaled to our parameters    :: Grid Point
-               $ A.use $ GA.gridPoint2AccArrPoint screen               -- The unscaled default screen :: Grid Point
+  let picture  = draw $ GA.accArr2Grid screen          -- turned into a pretty picture 'v'
+               . getColors colorList                   -- turned into colored grid    :: Grid Color
+               . GA.accArr2Grid $ CPU.run $ GA.getEscapeStepsAcc      -- turned into numbered grid   :: Matrix Int
+               . GA.getSequencesAcc2       -- turned into sequenced grid  :: Matrix [Point]
+               . (`scaleAcc` tf)           -- Scaled to our parameters    :: Matrix Point
+               $ A.use screen              -- The unscaled default screen :: Matrix Point
    in w { currentPicture = picture
         , isChanged      = False }
 

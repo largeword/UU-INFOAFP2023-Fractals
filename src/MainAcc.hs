@@ -7,6 +7,7 @@ import Console
 
 import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact hiding (Vector)
+import Data.Array.Accelerate
 import Debug.Trace
 
 main :: IO ()
@@ -21,12 +22,17 @@ main = play (InWindow "Fractals" (screenHeight, screenWidth) (0, 0))        -- O
 
 startWorld :: World
 startWorld = MkWorld
-    [[(fromIntegral $ x - halfScrW, fromIntegral $ y - halfScrH) | x <- [0..screenWidth-1]] | y <- [0..screenHeight-1]]
+    worldMatrix
     (GenData { position = (0,0), escapeRadius = 100, parameter = VarZ, offset = (0,0), func = fracFunc})
     (1, (0, 0))
     Blank
     True
     where
         fracFunc = makeFractalFunction False 2 
-        -- if 1st arg is True, then absolute value will be taken of z
-        -- second arg represents polynomial degree
+        worldMatrix = fromList (Z:.x:.y) flatList :: Matrix (Float, Float)
+          where  x = Prelude.length gridPoint
+                 y = Prelude.length (head gridPoint)
+                 flatList = concat gridPoint
+                 gridPoint = [[(fromIntegral $ x - halfScrW, fromIntegral $ y - halfScrH) 
+                              | x <- [0..screenWidth -1]] 
+                              | y <- [0..screenHeight-1]]

@@ -2,7 +2,7 @@
 
 
 
-module GeneratorAcc (getSequencesAcc2, getEscapeStepsAcc, accArr2GridFloat, grid2AccArrFloat, gridPoint2AccArrPoint, accArr2GridInt) where
+module GeneratorAcc (getSequencesAcc2, getEscapeStepsAcc, accArr2Grid) where
 
 import Data.Array.Accelerate              as A
 import Data.Array.Accelerate.LLVM.Native  as CPU
@@ -155,24 +155,8 @@ crossThreshouldAcc point = ifThenElse ((A.isNaN zx) A.|| (A.isNaN zy))
                                     zx = A.fst point
                                     zy = A.snd point
 
-grid2AccArrFloat :: Grid Float -> Matrix Float
-grid2AccArrFloat grid = fromList (Z:.x:.y) flatList :: Matrix Float
-  where x = Prelude.length grid
-        y = Prelude.length (head grid)
-        flatList = concat grid
 
-gridPoint2AccArrPoint :: Grid (Float, Float) -> Matrix (Float, Float)
-gridPoint2AccArrPoint gridPoint = fromList (Z:.x:.y) flatList :: Matrix (Float, Float)
-  where x = Prelude.length gridPoint
-        y = Prelude.length (head gridPoint)
-        flatList = concat gridPoint
-
-accArr2GridFloat :: Matrix Float -> Grid Float
-accArr2GridFloat accMtx = reshapeList flatList x
-  where flatList = toList accMtx
-        Z :. y :. x = runExp $ shape $ use accMtx
-
-accArr2GridInt :: Matrix Int -> Grid Int
+accArr2Grid :: (Elt a) => Matrix a -> Grid a
 accArr2GridInt accMtx = reshapeList flatList x
   where flatList = toList accMtx
         Z :. y :. x = runExp $ shape $ use accMtx
