@@ -6,10 +6,10 @@ import GHC.Float (int2Float)
 
 -- Separate properties of the screen
 screenWidth :: Int
-screenWidth = 500
+screenWidth = 1000
 
 screenHeight :: Int
-screenHeight = 500
+screenHeight = 1000
 
 halfScrW :: Int
 halfScrW = screenWidth `div` 2

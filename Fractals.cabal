@@ -25,7 +25,8 @@ extra-source-files:
     README.md
 
 executable Fractals
-    main-is:          Main.hs
+    main-is:          MainAcc.hs
+    -- main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
     other-modules:    Controller
@@ -33,6 +34,8 @@ executable Fractals
                  ,    View
                  ,    Generator
                  ,    Console
+                 ,    ControllerAcc
+                 ,    GeneratorAcc
                  
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -54,4 +57,5 @@ executable Fractals
     
     -- eneble debugging by running $ cabal configure --enable-profiling --profiling-detail toplevel-functions
     -- ghc-options:      -prof -fprof-auto -with-rtsopts=-xc
+    ghc-options:      -threaded
     

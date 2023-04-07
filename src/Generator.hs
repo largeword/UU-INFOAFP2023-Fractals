@@ -47,11 +47,6 @@ getEscapeSteps grid = gridMap ( length              -- the amount of unescaped v
                               else (zx ** 2 + zy ** 2) < 100
 
 
-
-
-
-
-
 ---------- FATE OF CODE TBD --------------
 
 -- -- generate possition for each pixel

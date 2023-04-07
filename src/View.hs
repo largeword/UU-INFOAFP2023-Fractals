@@ -61,3 +61,4 @@ float2Color colors x = let x' = if isNaN x then trace "NaN" $ int2Float (length 
                                      (1 - mixProportion)
                                      (colorList !! floorX) 
                                      (colorList !! ceilingX)
+
