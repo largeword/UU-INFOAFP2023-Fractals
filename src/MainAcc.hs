@@ -16,7 +16,7 @@ main = play (InWindow "Fractals" (screenHeight, screenWidth) (0, 0))        -- O
             startWorld                                                      -- Initial state
             drawHandler                                                     -- View function
             inputHandler                                                    -- Event function
-            stepHandler                                                     -- Step function
+            stepHandlerAcc                                                     -- Step function
 
 
 startWorld :: World
