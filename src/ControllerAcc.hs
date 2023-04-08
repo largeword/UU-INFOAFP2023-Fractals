@@ -3,7 +3,7 @@
 module ControllerAcc where
 
 import ModelAcc
-import View
+import ViewAcc
 import Generator
 
 import Data.List
@@ -72,35 +72,17 @@ parseEvent (EventKey key _ _ _) = case key of
 parseEvent                 _ =  Nothing
 
 
-{-
--- | Handles a single step in our world
---   We compute and render the fractal in here,
---   only if our boolean flag is set to True
-stepHandler :: Float -> World -> World
-stepHandler _ w@(MkWorld screen d tf _ True) =
-  let picture  = draw screen          -- turned into a pretty picture 'v'
-               . getColors colorList  -- turned into colored grid    :: Grid Color
-               . getEscapeSteps       -- turned into numbered grid   :: Grid Int
-               . getSequences d       -- turned into sequenced grid  :: Grid [Point]
-               . (`scale` tf)         -- Scaled to our parameters    :: Grid Point
-               $ screen               -- The unscaled default screen :: Grid Point
-   in w { currentPicture = picture
-        , isChanged      = False }
-
--- | Default case - nothing is changed
-stepHandler _ w = w
--}
-
-
 -- | Accelerated version
 stepHandlerAcc :: Float -> World -> World
 stepHandlerAcc _ w@(MkWorld screen d tf _ True) =
-  let picture  = draw (GA.arr2Grid screen)          -- turned into a pretty picture 'v'
-               . getColors colorList                -- turned into colored grid    :: Grid Color
-               . GA.arr2Grid $ CPU.run $ GA.getEscapeStepsAcc      -- turned into numbered grid   :: Matrix Int
-               . GA.getSequencesAcc       -- turned into sequenced grid  :: Matrix [Point]
-               . (`scaleAcc` tf)          -- Scaled to our parameters    :: Matrix Point
-               $ A.use screen             -- The unscaled default screen :: Matrix Point
+  let picture  = draw                                      -- turned into a pretty picture 'v'
+               . GA.arr2Grid $ CPU.run                     -- running accelerated process  :: Grid (Point, Color)
+               . A.zipWith (\a b -> (a,b)) (A.use screen)  -- zipping colour with position :: Matrix (Point, Color)
+               . getColorsAcc colorList                    -- turned into colored grid     :: Matrix Color
+               . GA.getEscapeStepsAcc                      -- turned into numbered grid    :: Matrix Int
+               . GA.getSequencesAcc                        -- turned into sequenced grid   :: Matrix [Point]
+               . (`scaleAcc` tf)                           -- Scaled to our parameters     :: Matrix Point
+               $ A.use screen                              -- The unscaled default screen  :: Matrix Point
    in w { currentPicture = picture
         , isChanged      = False }
 
@@ -136,7 +118,7 @@ scale grid (zoom, (rOff, iOff)) = gridMap f grid
     zoom' = zoom * scaleFactor
 
 
-scaleAcc :: Acc (Array ((A.Z :. Int) :. Int) (Float, Float)) -> (ZoomScale, Translation) -> Acc (Array ((A.Z :. Int) :. Int) (Float, Float))
+scaleAcc :: Acc (Matrix (Float, Float)) -> (ZoomScale, Translation) -> Acc (Matrix (Float, Float))
 scaleAcc gridAcc (zoom, (rOff, iOff)) = A.map f gridAcc
   where
     zoom' = (A.lift zoom) A.* (A.lift scaleFactor)
@@ -145,16 +127,3 @@ scaleAcc gridAcc (zoom, (rOff, iOff)) = A.map f gridAcc
                   i = A.snd point in
               A.lift (r A.* zoom' A.+ (A.lift rOff), i A.* zoom' A.+ (A.lift iOff))
 
-            
-
--- KEY MAPPINGS
-
--- Panning: translation magnitudes (eventually within window app?)
-
-    -- in x direction
-
-    -- in y direction
-
--- Zoomscaling
-
--- Later on: loading config document or querying user for input values via console (implement in main.hs in do-block)

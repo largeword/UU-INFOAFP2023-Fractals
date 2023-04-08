@@ -22,21 +22,12 @@ import Data.List.Split (chunksOf)
 import Model (Grid)
 
 
--- let mat1 = fromList (Z:.50:.50) [0,0.001 ..]
--- let mat2 = fromList (Z:.50:.50) [0,0.001 ..]
--- mat = A.zip (use mat1) (use mat2)
--- a = CPU.run $ getEscapeStepsAcc $ getSequencesAcc2 mat
 
 
--- let mat = fromList (Z:.4:.2) [(1,2),(101,200),(1,2),(100,2),(2,3),(100,30),(1,2),(3,3)]
-
-
-getSequencesAcc :: Acc (Array ((Z :. Int) :. Int) (Float, Float)) -> Acc (Array (((Z :. Int) :. Int) :. Int) (Float, Float))
+getSequencesAcc :: Acc (Matrix (Float, Float)) -> Acc (Cubic (Float, Float))
 getSequencesAcc gridAcc = A.map getValueOnStepAcc gridAcc''
                           where gridAcc' = A.replicate (A.constant (Z :. All :. All :. (100::Int))) gridAcc
                                 gridAcc'' = A.indexed gridAcc'
-                                -- gridShape = shape gridAcc'
-                                -- gridAccFlat = A.flatten gridAcc''
 
 
 getValueOnStepAcc :: Exp (((Z :. Int) :. Int) :. Int, (Float, Float)) -> Exp (Float, Float)
@@ -60,7 +51,7 @@ iterateExpr point = lift (zx A.** 2 A.- zy A.** 2 + 0, 2 A.* zx A.* zy + 0)
 -- Matrix (Z :. 2 :. 2) 
 --  [ 1, 1,
 --    1, 2]
-getEscapeStepsAcc :: Acc (Array (((Z :. Int) :. Int) :. Int) (Float, Float)) -> Acc (Array ((Z :. Int) :. Int) Int)
+getEscapeStepsAcc :: Acc (Cubic (Float, Float)) -> Acc (Matrix Int)
 getEscapeStepsAcc gridAcc = A.asnd $ (A.filter (A.== (lift True)) (A.map crossThreshouldAcc gridAcc))
 
 

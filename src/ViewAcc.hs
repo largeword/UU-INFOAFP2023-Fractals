@@ -27,69 +27,34 @@ drawHandler (MkWorld _ _ _ p _) = p
 --   Input parameters are (unscaled) grid of points and grid of colours
 --   By zipping them together we can easily map pointToPicture over them
 --   Then the result is condensed into a single picture
-draw :: Grid Point -> Grid Color -> Picture
-draw screen cols = let pointAndColour = Prelude.zipWith Prelude.zip screen cols
-                       pics           = gridMap pointToPicture pointAndColour
+draw :: Grid (Point, Color) -> Picture
+draw pointAndCol = let pics = gridMap pointToPicture pointAndColour
                     in Pictures . Prelude.map Pictures $ pics
 
 -- | Very simple: generate a pixel point, and give it the right colour and translation
 --   Because the translation is wrt the screen coordinates as opposed to view coordinates,
 --   these need to be the unscaled versions.
 pointToPicture :: (Point, Color) -> Picture
-pointToPicture ((x, y), c) = Translate x y $ Color c $ Circle 1
+pointToPicture ((x, y), c) = let (r, g, b, a) = c
+                                 c'           = makeColor r g b a
+                              in Translate x y $ Color c' $ Circle 1
 
 
-
-
-{-
--- | This function maps the Grid of escaping steps into the corresponding colors
-getColors :: [Color] -> Grid Int -> Grid Color
-getColors colors grid = let grid' = rescaleGrid2ColorRange colors grid
-                         in gridMap (float2Color colors) grid'
-
-
--- | This function maps the input Grid Int into the right range of color list with decimals
---   https://intellipaat.com/community/33375/convert-a-number-range-to-another-range-maintaining-the-ratio
-rescaleGrid2ColorRange :: [Color] -> Grid Int -> Grid Float
-rescaleGrid2ColorRange colors grid = 
-  let gridMax  = int2Float . maximum    . concat $ grid
-      gridMin  = int2Float . minimum    . concat $ grid
-      colMax   = int2Float . subtract 1 . length $ colors
-      f        = \x -> if gridMax == 0 then 0 else ((int2Float x) - gridMin)  * (colMax) / (gridMax - gridMin)  -- 0/0 = NaN
-
-   in gridMap f grid
-
-
--- | This function takes a color list and a float number, then find the nearest two colors in the list 
---   according to float as index, and mix these colors with the right proportion
-float2Color :: [Color] -> Float -> Color
-float2Color colors x = let x' = if isNaN x then trace "NaN" $ int2Float (length colors - 1) else x  -- If NaN, it means no steps are not escaping 
-                           floorX = floor x'
-                           ceilingX = ceiling x'
-                           mixProportion = (x' -) . int2Float $ floorX
-                        in mixColors mixProportion
-                                     (1 - mixProportion)
-                                     (colorList !! floorX) 
-                                     (colorList !! ceilingX)
--}
-
-
--- | Arguments: Red Green Blue Alpha (all values should be in [0..1])
-type ColorAcc = (Float, Float, Float, Float) --deriving (Show, Generic, Elt)
+               
 
 
 -- | This function is used to color every pixel based on their escaping step
-getColorsAcc :: Acc (Array (A.Z :. Int) ColorAcc) 
-                -> Acc (Array ((A.Z :. Int) :. Int) Int) 
-                -> Acc (Array ((A.Z :. Int) :. Int) ColorAcc)
+getColorsAcc :: Acc (Vector ColorAcc) 
+                -> Acc (Matrix Int) 
+                -> Acc (Matrix ColorAcc)
 getColorsAcc colorsAcc gridAcc = let grid' = rescaleGrid2ColorRangeAcc colorsAcc gridAcc
                                  in  A.map (float2ColorAcc colorsAcc) grid'
 
 
 -- | This function is used to rescale the escaping step into color index range
-rescaleGrid2ColorRangeAcc :: Acc (Array (A.Z :. Int) ColorAcc) 
-                             -> Acc (Array ((A.Z :. Int) :. Int) Int) 
-                             -> Acc (Array ((A.Z :. Int) :. Int) Float)
+rescaleGrid2ColorRangeAcc :: Acc (Vector ColorAcc) 
+                             -> Acc (Matrix Int) 
+                             -> Acc (Matrix Float)
 rescaleGrid2ColorRangeAcc colorsAcc gridAcc = 
   let gridAccFlat = A.flatten gridAcc
       gridAccMax  = A.toFloating ((A.maximum gridAccFlat) A.!! 0) :: Exp Float
@@ -104,7 +69,7 @@ rescaleGrid2ColorRangeAcc colorsAcc gridAcc =
 
 -- | This function takes a color list and a float number, then find the nearest two colors in the list 
 --   according to float as index, and mix these colors with the right proportion
-float2ColorAcc :: Acc (Array (A.Z :. Int) ColorAcc) -> Exp Float -> Exp ColorAcc
+float2ColorAcc :: Acc (Vector ColorAcc) -> Exp Float -> Exp ColorAcc
 float2ColorAcc colorsAcc x = let x' = A.ifThenElse (A.isNaN x) 
                                                    (A.toFloating ((A.length colorsAcc) A.- 1)) 
                                                    (x) :: Exp Float

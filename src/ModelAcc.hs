@@ -4,7 +4,7 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
 
-import Data.Array.Accelerate (Matrix)
+import Data.Array.Accelerate
 
 -- Separate properties of the screen
 screenWidth :: Int
@@ -72,7 +72,9 @@ data EventAction = Move Direction
                  | Zoom Zoom
   deriving (Eq, Show)
   
-
+-- | Arguments: Red Green Blue Alpha (all values should be in [0..1])
+type ColorAcc = (Float, Float, Float, Float)
+type Cubic = Array DIM3
 
 ---- Functions for generating the fractal
 
@@ -115,28 +117,14 @@ gridMap f = map (map f)
 
 -- | Default color list
 --   https://colorswall.com/palette/128774
-colorList :: [Color]
-colorList = [makeColorI r g b a | (r,g,b,a) <- rgbs ]
+colorList :: Vector ColorAcc
+colorList = fromList (Z:.6) $ map toFloats rbgs
   where  --    R    G    B   A
-    rgbs = [ (43 , 192, 232, 255)
-           , (246, 203, 102, 255)
-           , (72 , 68 , 152, 255)
-           , (99 , 167, 94 , 255)
-           , (160, 172, 180, 255)
-           , (68 , 62 , 94 , 255)]
+    rgbs = [ (43.0 , 192.0, 232.0, 255.0)
+           , (246.0, 203.0, 102.0, 255.0)
+           , (72.0 , 68.0 , 152.0, 255.0)
+           , (99.0 , 167.0, 94.0 , 255.0)
+           , (160.0, 172.0, 180.0, 255.0)
+           , (68.0 , 62.0 , 94.0 , 255.0)]
+    toFloats (a, b, c, d) = (a / 255, b / 255, c / 255, d / 255)
 
--- How to get from a fixed grid of 2-D floating point to adjustable fractals/pictures:
-    -- 1.  Initialise world
-    -- 2.  record user's panning and zoom (later users can also define their own fractal
-    --     parameters so they can make their own fractals)
-    -- 3.  Adjust current translation value to sum of current and input values 
-    -- 4.  Same for zoom but now by a certain multiplication formula
-    -- 5.  Apply translation to each point in the grid
-    -- 6.  Apply zoom scaling to each of the resulting points
-    -- 7.  Pass the resulting 2D matrix to the generateFractal function: this returns
-    --     a 2D array of numeric values.
-    -- 8.  Pass this matrix to a colourMatrix function that maps the values to colours.
-    -- 9.  Embed each colour in the resulting colourMatrix in a Picture type and combine 
-    --     (fold hihi) all those pictures recursively into one picture.
-    -- 10. Embed picture in the world and call drawHandler. 
-    
