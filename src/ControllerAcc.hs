@@ -24,7 +24,7 @@ import GeneratorAcc as GA
 
 -- | InputHandler is responsible for all inputs that happen
 --   It contains three cases, each explained in further detail below
-inputHandler :: Event -> World -> World
+inputHandler :: Event -> World -> IO World
 
 -- | This is a special (and WIP) case.  It involves an action that happens
 --   immediately once.
@@ -32,8 +32,15 @@ inputHandler :: Event -> World -> World
 --   or (potentially in the future) using the mousewheel to zoom
 inputHandler (EventKey (MouseButton LeftButton) Down _ (x, y)) w = 
   let newData = (gData w) { offset = (x / 125, y / 125)}
-   in w {gData = newData, isChanged = True}
-inputHandler (EventKey (Char        'r'       ) Down _ _     ) w = w {isChanged = True}
+   in return $ w {gData = newData, isChanged = True}
+inputHandler (EventKey (Char        'r'       ) Down _ _     ) w = 
+  return $ w { transform = (1, (0, 0))
+             , isChanged = True}
+inputHandler (EventKey (Char        ' '       ) Down _ _     ) w =
+  do gd <- getGenData
+     return $ w {gData      = gd
+                , isChanged = True}
+
 
 -- | This is a case for events that happen every tick, as long as a button is held
 --   Such as moving using the buttons
@@ -41,13 +48,13 @@ inputHandler (EventKey (Char        'r'       ) Down _ _     ) w = w {isChanged 
 --   in which case it is added to the event list
 inputHandler e@(EventKey _ Down _ _) w =
   case parseEvent e of 
-    Nothing -> w
+    Nothing -> return w
     Just ev -> let tf = doEvent ev (transform w)
-                in w { transform = tf
-                     , isChanged = True }
+                in return $ w { transform = tf
+                              , isChanged = True }
 
 -- | Lastly, wildcard pattern returns the input world
-inputHandler _ w = w
+inputHandler _ w = return w
 
 
 -- | Straight-forward function to parse the Gloss event type into a custom data
@@ -73,7 +80,7 @@ parseEvent                 _ =  Nothing
 
 
 -- | Accelerated version
-stepHandlerAcc :: Float -> World -> World
+stepHandlerAcc :: Float -> World -> IO World
 stepHandlerAcc _ w@(MkWorld screen d tf _ True) =
   let picture  = draw                                      -- turned into a pretty picture 'v'
                . GA.arr2Grid $ CPU.run                     -- running accelerated process  :: Grid (Point, Color)
@@ -83,8 +90,8 @@ stepHandlerAcc _ w@(MkWorld screen d tf _ True) =
                . GA.getSequencesAcc                        -- turned into sequenced grid   :: Matrix [Point]
                . (`scaleAcc` tf)                           -- Scaled to our parameters     :: Matrix Point
                $ A.use screen                              -- The unscaled default screen  :: Matrix Point
-   in w { currentPicture = picture
-        , isChanged      = False }
+   in return $ w { currentPicture = picture
+               , isChanged      = False }
 
 -- | Default case - nothing is changed
 stepHandlerAcc _ w = w

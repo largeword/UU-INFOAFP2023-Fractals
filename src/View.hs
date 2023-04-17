@@ -9,8 +9,8 @@ import GHC.Float (int2Float)
 import Debug.Trace
 
 
-drawHandler :: World -> Picture
-drawHandler (MkWorld _ _ _ p _) = p
+drawHandler :: World -> IO Picture
+drawHandler (MkWorld _ _ _ p _) = return p
 
 
 -- | Function called in the last step of the step

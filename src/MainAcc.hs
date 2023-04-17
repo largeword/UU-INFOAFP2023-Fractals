@@ -15,19 +15,23 @@ import Graphics.Gloss.Interface.IO.Interact hiding (Vector)
 import Data.Array.Accelerate
 
 main :: IO ()
-main = play (InWindow "Fractals" (screenHeight, screenWidth) (0, 0))        -- Or Fullscreen
-            black                                                           -- Background color
-            60                                                              -- Frames per second
-            startWorld                                                      -- Initial state
-            drawHandler                                                     -- View function
-            inputHandler                                                    -- Event function
-            stepHandlerAcc                                                     -- Step function
+main = do
+    gd <- getGenData
+    let world = startWorld gd
+
+    playIO (InWindow "Fractals" (screenHeight, screenWidth) (0, 0))
+            black                                                        -- Background color
+            60                                                           -- Frames per second
+            world                                                        -- Initial state
+            drawHandle                                                   -- View function
+            inputHandler                                                 -- Event function
+            stepHandlerAcc                                                -- Step function
 
 
-startWorld :: World
-startWorld = MkWorld
+startWorld :: GeneratorData -> World
+startWorld gd = MkWorld
     worldMatrix
-    (GenData { position = (0,0), escapeRadius = 100, parameter = VarZ, offset = (0,0), func = fracFunc})
+    gd
     (1, (0, 0))
     Blank
     True
