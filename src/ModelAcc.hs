@@ -1,4 +1,4 @@
-module ModelAcc (hiding Z) where
+module ModelAcc where
 
 import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact
@@ -31,10 +31,7 @@ type Translation = (Float, Float)
 
 -- | A type synonym to define the abstract point calculation function
 --  The first argument is the starting point z and the second the complex parameter c
-newtype Z = Point
-newtype C = Point
-
-type FractalFunction = Z -> C -> Point  
+type FractalFunction = Point -> Point -> Point  
 
 -- | Describes which function parameter will be varied in the fractal generation function
 data VarParameter = VarZ 
