@@ -10,11 +10,11 @@ import Data.Array.Accelerate              as A
 import Prelude as P
 
 -- Separate properties of the screen
-screenWidth :: Int
-screenWidth = 2000
-
 screenHeight :: Int
-screenHeight = 2000
+screenHeight = 1000
+
+screenWidth :: Int
+screenWidth = 1000
 
 halfScrW :: Int
 halfScrW = screenWidth `div` 2

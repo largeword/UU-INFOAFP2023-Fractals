@@ -44,8 +44,9 @@ iterateExpr genData point = lift (zx A.** 2 A.- zy A.** 2 + 0, 2 A.* zx A.* zy +
 
 getSequencesAcc :: GeneratorData -> Acc (Array ((Z :. Int) :. Int) (Float, Float)) -> Acc (Array (((Z :. Int) :. Int) :. Int) (Float, Float))
 getSequencesAcc genData gridAcc = A.map (getValueOnStepAcc genData) gridAcc''
-                          where gridAcc' = A.replicate (A.constant (Z :. All :. All :. (100::Int))) gridAcc
+                          where gridAcc'  = A.replicate (A.constant (Z :. All :. All :. (t::Int))) gridAcc
                                 gridAcc'' = A.indexed gridAcc'
+                                t         = escapeRadius genData
 
 iterateExpr :: GeneratorData -> Exp (Float, Float) -> Exp (Float, Float)
 iterateExpr genData = fracFunc c
