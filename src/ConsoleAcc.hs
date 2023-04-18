@@ -63,15 +63,13 @@ getSpecifiedImplementation = do
     getVarParam = do
         putStrLn "\nWould you like to iterate over the position (as in the Mandelbrot set)"
         putStrLn "Or over the offset (as in the Julia set)"
-        putStrLn "Or over both position and offset?"
-        putStrLn "[m|j|b]\n"
+        putStrLn "[m|j]\n"
 
         c <- getChar
         _ <- getChar
         case c of
           'm' -> return VarC
           'j' -> return VarZ
-          'b' -> return VarZandC
           _   -> do putStrLn "Unable to parse input"
                     getVarParam
 
