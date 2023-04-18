@@ -19,7 +19,7 @@ import Data.Array.Accelerate.Interpreter  as I
 
 import GeneratorAcc as GA
 
--- import Debug.Trace
+import Debug.Trace
 
 
 -- | InputHandler is responsible for all inputs that happen
@@ -36,10 +36,12 @@ inputHandler (EventKey (MouseButton LeftButton) Down _ (x, y)) w =
 inputHandler (EventKey (Char        'r'       ) Down _ _     ) w = 
   return $ w { transform = (1, (0, 0))
              , isChanged = True}
-inputHandler (EventKey (Char        ' '       ) Down _ _     ) w =
+inputHandler (EventKey (Char        'g'       ) Down _ _     ) w = trace "hit" $
   do gd <- getGenData
+     let _ = gd `seq` undefined 
      return $ w { gData      = gd
                 , isChanged = True}
+
 
 
 -- | This is a case for events that happen every tick, as long as a button is held
