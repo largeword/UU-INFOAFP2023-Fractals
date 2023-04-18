@@ -11,10 +11,10 @@ import Prelude as P
 
 -- Separate properties of the screen
 screenWidth :: Int
-screenWidth = 1000
+screenWidth = 2000
 
 screenHeight :: Int
-screenHeight = 1000
+screenHeight = 2000
 
 halfScrW :: Int
 halfScrW = screenWidth `div` 2

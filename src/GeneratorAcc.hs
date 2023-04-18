@@ -52,18 +52,21 @@ iterateExpr genData = fracFunc c
                       where -- point = A.snd idxPt
                             fracFunc = func     genData 
                             c        = offset   genData
-                            z        = position genData
+                            -- z        = position genData
 
 getValueOnStepAcc :: GeneratorData -> Exp (((Z :. Int) :. Int) :. Int, (Float, Float)) -> Exp (Float, Float)
-getValueOnStepAcc genData idxWithPoint = A.ifThenElse interateFlag
-                                                      (A.iterate (lift t) (iterateExpr genData {position = point}) point)
-                                                      (A.iterate (lift t) (iterateExpr genData {offset = point}) point)
+getValueOnStepAcc genData idxWithPoint = A.iterate (lift t) (`fracFunc` z) c
+
                                where idx = A.fst idxWithPoint
                                      (T3 x y t) = A.unindex3 idx  
                                      point = A.snd idxWithPoint
-                                     
-                                     interateFlag = A.lift (parameter genData Prelude.== VarZ) :: Exp Bool
-
+                                     genData' :: GeneratorData 
+                                     genData' = case parameter genData of 
+                                                  VarC -> genData {offset = point}
+                                                  VarZ -> genData {position = point} 
+                                     fracFunc = func genData'
+                                     z   = offset genData'
+                                     c = position genData' 
 
 
 
