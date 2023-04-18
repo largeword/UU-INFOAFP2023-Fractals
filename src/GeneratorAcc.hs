@@ -1,8 +1,8 @@
-{-# LANGUAGE FlexibleContexts, 
-             TypeFamilies, 
-             TypeOperators, 
-             UndecidableInstances, 
-             AllowAmbiguousTypes #-}
+{-# LANGUAGE FlexibleContexts
+           , TypeFamilies
+           , TypeOperators
+           , UndecidableInstances
+           , AllowAmbiguousTypes #-}
 
 module GeneratorAcc (getSequencesAcc, getEscapeStepsAcc, grid2Arr, arr2Grid) where
 

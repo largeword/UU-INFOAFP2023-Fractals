@@ -1,7 +1,7 @@
-{-# LANGUAGE FlexibleContexts, 
-             TypeFamilies, 
-             UndecidableInstances, 
-             AllowAmbiguousTypes #-}
+{-# LANGUAGE FlexibleContexts
+           , TypeFamilies
+           , UndecidableInstances
+           , AllowAmbiguousTypes #-}
 
 module ViewAcc (drawHandler, draw, getColorsAcc) where
 

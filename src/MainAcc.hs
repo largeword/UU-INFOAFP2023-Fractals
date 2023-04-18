@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, FlexibleContexts, TypeFamilies, TypeOperators, FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts
+           , TypeFamilies #-}
 
 module Main where
 
