@@ -28,12 +28,12 @@ getSequencesAcc genData gridAcc = A.map (getValueOnStepAcc genData) gridAcc''
     t         = escapeRadius genData
 
 -- | Iterate the fracFunc over a certain index
---   The third dimension of the index, z, defines how much we interate
+--   The third dimension of the index, t, defines how much we interate
 getValueOnStepAcc :: GeneratorData -> Exp (((Z :. Int) :. Int) :. Int, (Float, Float)) -> Exp (Float, Float)
-getValueOnStepAcc genData idxWithPoint = A.iterate (lift z) (`fracFunc` c) z 
+getValueOnStepAcc genData idxWithPoint = A.iterate (lift t) (`fracFunc` c) z 
   where 
     idx        = A.fst idxWithPoint
-    (T3 x y z) = A.unindex3 idx  
+    (T3 x y t) = A.unindex3 idx  
     point      = A.snd idxWithPoint
     genData'   = case parameter genData of 
                    VarC -> genData {offset = point}
@@ -67,8 +67,8 @@ runExp e = indexArray (CPU.run (unit e)) Z
 
 grid2Arr :: (Elt a) => Grid a -> Matrix a
 grid2Arr grid = fromList (Z:.x:.y) flatList
-  where x = Prelude.length grid
-        y = Prelude.length (head grid)
+  where x = P.length grid
+        y = P.length (head grid)
         flatList = concat grid
 
 arr2Grid :: (Elt a) => Matrix a -> Grid a
