@@ -9,6 +9,7 @@ import Console
 
 import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact hiding (Vector)
+import Graphics.Gloss.Interface.IO.Game hiding (Vector)
 
 --import Debug.Trace
 
@@ -23,9 +24,9 @@ main = do
             black                                                        -- Background color
             60                                                           -- Frames per second
             world                                                        -- Initial state
-            drawHandle                                                   -- View function
+            drawHandler                                                  -- View function
             inputHandler                                                 -- Event function
-            stepHandlerAcc                                                -- Step function
+            stepHandlerAcc                                               -- Step function
 
 
 startWorld :: GeneratorData -> World
