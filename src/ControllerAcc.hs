@@ -4,7 +4,6 @@ module ControllerAcc where
 
 import ModelAcc
 import ViewAcc
-import Generator
 import Console
 
 import Data.List
