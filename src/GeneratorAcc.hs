@@ -19,8 +19,7 @@ import Data.Array.Accelerate.Sugar.Elt
 
 import Data.List.Split (chunksOf)
 
-import Model (Grid, Cubic)
-
+import ModelAcc 
 
 
 
