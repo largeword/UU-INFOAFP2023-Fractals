@@ -44,7 +44,7 @@ pointToPicture ((x, y), c) = let (r, g, b, a) = c
 
 
 -- | This function is used to color every pixel based on their escaping step
-getColorsAcc :: Acc (Vector ColorAcc) 
+getColorsAcc :: Acc (A.Vector ColorAcc) 
                 -> Acc (Matrix Int) 
                 -> Acc (Matrix ColorAcc)
 getColorsAcc colorsAcc gridAcc = let grid' = rescaleGrid2ColorRangeAcc colorsAcc gridAcc
@@ -52,7 +52,7 @@ getColorsAcc colorsAcc gridAcc = let grid' = rescaleGrid2ColorRangeAcc colorsAcc
 
 
 -- | This function is used to rescale the escaping step into color index range
-rescaleGrid2ColorRangeAcc :: Acc (Vector ColorAcc) 
+rescaleGrid2ColorRangeAcc :: Acc (A.Vector ColorAcc) 
                              -> Acc (Matrix Int) 
                              -> Acc (Matrix Float)
 rescaleGrid2ColorRangeAcc colorsAcc gridAcc = 
@@ -69,7 +69,7 @@ rescaleGrid2ColorRangeAcc colorsAcc gridAcc =
 
 -- | This function takes a color list and a float number, then find the nearest two colors in the list 
 --   according to float as index, and mix these colors with the right proportion
-float2ColorAcc :: Acc (Vector ColorAcc) -> Exp Float -> Exp ColorAcc
+float2ColorAcc :: Acc (A.Vector ColorAcc) -> Exp Float -> Exp ColorAcc
 float2ColorAcc colorsAcc x = let x' = A.ifThenElse (A.isNaN x) 
                                                    (A.toFloating ((A.length colorsAcc) A.- 1)) 
                                                    (x) :: Exp Float
