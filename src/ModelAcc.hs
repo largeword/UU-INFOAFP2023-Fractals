@@ -1,10 +1,11 @@
 module ModelAcc (hiding Z) where
 
-import Graphics.Gloss
+import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
 
-import Data.Array.Accelerate
+import Data.Array.Accelerate hiding (<=, ++, even, map,  )
+import Prelude as P
 
 -- Separate properties of the screen
 screenWidth :: Int
@@ -60,17 +61,17 @@ data World = MkWorld
 
 data Zoom = In
           | Out
-  deriving (Eq, Show)
+  deriving (P.Eq, Show)
 
 data Direction = Left'
                | Right'
                | Up'
                | Down'
-  deriving (Eq, Show)
+  deriving (P.Eq, Show)
 
 data EventAction = Move Direction
                  | Zoom Zoom
-  deriving (Eq, Show)
+  deriving (P.Eq, Show)
   
 -- | Arguments: Red Green Blue Alpha (all values should be in [0..1])
 type ColorAcc = (Float, Float, Float, Float)
