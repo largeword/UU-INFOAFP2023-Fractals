@@ -83,19 +83,19 @@ parseEvent                 _ =  Nothing
 -- | Accelerated version
 stepHandlerAcc :: Float -> World -> IO World
 stepHandlerAcc _ w@(MkWorld screen d tf _ True) =
-  let picture  = draw                          -- turned into a pretty picture 'v'
-               . GA.arr2Grid $ CPU.run         -- running accelerated process  :: Grid (Point, Color)
-               . A.zipWith (,) (A.use screen)  -- zipping colour with position :: Matrix (Point, Color)
-               . getColorsAcc colorList        -- turned into colored grid     :: Matrix Color
-               . GA.getEscapeStepsAcc          -- turned into numbered grid    :: Matrix Int
-               . GA.getSequencesAcc            -- turned into sequenced grid   :: Matrix [Point]
-               . (`scaleAcc` tf)               -- Scaled to our parameters     :: Matrix Point
-               $ A.use screen                  -- The unscaled default screen  :: Matrix Point
+  let picture  = draw                            -- turned into a pretty picture 'v'
+               . GA.arr2Grid $ CPU.run           -- running accelerated process  :: Grid (Point, Color)
+               . A.zipWith (\a b -> (a, b)) (A.use screen)    -- zipping colour with position :: Matrix (Point, Color)
+               . getColorsAcc $ A.use colorList  -- turned into colored grid     :: Matrix Color
+               . GA.getEscapeStepsAcc            -- turned into numbered grid    :: Matrix Int
+               . GA.getSequencesAcc              -- turned into sequenced grid   :: Matrix [Point]
+               . (`scaleAcc` tf)                 -- Scaled to our parameters     :: Matrix Point
+               $ A.use screen                    -- The unscaled default screen  :: Matrix Point
    in return $ w { currentPicture = picture
                , isChanged      = False }
 
 -- | Default case - nothing is changed
-stepHandlerAcc _ w = w
+stepHandlerAcc _ w = return w
 
 
 eventStep :: [EventAction] -> (ZoomScale, Translation) -> (ZoomScale, Translation)
