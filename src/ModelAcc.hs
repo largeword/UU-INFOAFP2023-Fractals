@@ -4,7 +4,7 @@ import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
 
-import Data.Array.Accelerate hiding (<=, ++, even, map,  )
+import Data.Array.Accelerate hiding (even, map,  )
 import Prelude as P
 
 -- Separate properties of the screen
