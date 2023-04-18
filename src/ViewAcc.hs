@@ -28,14 +28,14 @@ drawHandler (MkWorld _ _ _ p _) = p
 --   By zipping them together we can easily map pointToPicture over them
 --   Then the result is condensed into a single picture
 draw :: Grid (Point, Color) -> Picture
-draw pointAndCol = let pics = gridMap pointToPicture pointAndColour
+draw pointAndCol = let pics = gridMap pointToPicture pointAndCol
                     in Pictures . Prelude.map Pictures $ pics
 
 -- | Very simple: generate a pixel point, and give it the right colour and translation
 --   Because the translation is wrt the screen coordinates as opposed to view coordinates,
 --   these need to be the unscaled versions.
 pointToPicture :: (Point, Color) -> Picture
-pointToPicture ((x, y), c) = let (r, g, b, a) = c
+pointToPicture ((x, y), c) = let (r, g, b, a) = rgbaOfColor c
                                  c'           = makeColor r g b a
                               in Translate x y $ Color c' $ Circle 1
 
