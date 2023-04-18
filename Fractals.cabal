@@ -35,7 +35,6 @@ executable Fractals
                  ,    GeneratorAcc
                  ,    Console
                  ,    Generator 
-                 ,    Model
                  ,    View
                  
     -- LANGUAGE extensions used by modules in this package.
