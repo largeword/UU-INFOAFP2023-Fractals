@@ -5,8 +5,8 @@ module ModelAcc where
 import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
-
 import Data.Array.Accelerate              as A
+
 import Prelude as P
 
 -- Separate properties of the screen
@@ -26,9 +26,6 @@ scaleFactor :: Float
 scaleFactor = 1.0 / (0.25 * int2Float screenWidth)
 
 
-type ZoomScale = Float
-type Translation = (Float, Float)
-
 ---- Data types regarding the representation and calculation of fractals
 
 -- | A type synonym to define the abstract point calculation function
@@ -40,24 +37,28 @@ type FractalFunctionAcc = ZAcc -> CAcc -> Exp (Float, Float)
 -- | Describes which function parameter will be varied in the fractal generation function
 data VarParameter = VarZ 
                   | VarC 
-                  | VarZandC
                   deriving (P.Eq)
 
 -- | Contains all information necessary to compute a fractal with a ZFunction
 data GeneratorData = GenData
-  { position         :: Exp (Float, Float)  -- other name for z in fractal function?
-  , offset           :: Exp (Float, Float)  -- offset c in the fractal polynomial
-  , escapeRadius     :: Int                 -- TO BE EXPLAINED 
-  , parameter        :: VarParameter 
+  { position         :: Exp (Float, Float)  -- Other name for z in fractal function?
+  , offset           :: Exp (Float, Float)  -- Offset c in the fractal polynomial
+  , escapeRadius     :: Int                 -- The amount of iterations we perform
+  , parameter        :: VarParameter        -- Describes which function parameterr will be varied
   , func             :: !FractalFunctionAcc -- Strictness required to ensure we do not calculate  
   }                                         -- the same function every iteration
 
-data World = MkWorld 
-  { screen         :: Matrix (Float, Float)
-  , gData          :: GeneratorData
-  , transform      :: (ZoomScale, Translation)
-  , currentPicture :: Picture  
-  , isChanged      :: Bool
+-- | Simply type synonyms to describe transformation: Zooming and translation
+type ZoomScale = Float
+type Translation = (Float, Float)
+
+-- | Contains all information of the world state
+data World = MkWorld
+  { screen         :: Matrix (Float, Float)     -- The array with all screen values
+  , gData          :: GeneratorData             -- The generatorData with which to compute the fractal
+  , transform      :: (ZoomScale, Translation)  -- The transformation values
+  , currentPicture :: Picture                   -- A cached version of our current picture
+  , isChanged      :: Bool                      -- Flags whether we need to recompute
   }
 
 
@@ -82,17 +83,20 @@ type Cubic = Array DIM3
 ---- Functions for generating the fractal
 
 -- | Create the fractal characteristic function based on user input
--- First input argument: take absolute of starting point (|Re(z)| + |Im(z)|)^n + c if True 
--- Second: degree n of the polynomial z^n + c 
-
+--   First input argument: take absolute of starting point (|Re(z)| + |Im(z)|)^n + c if True 
+--   Second: degree n of the polynomial z^n + c 
+--   Polynomial degrees <= 0 or non-integer polynomial degrees are not supported
 makeFractalFunctionAcc :: Bool -> Int -> FractalFunctionAcc
-makeFractalFunctionAcc isAbs degree            -- do we want decimal degrees? like z^1.5?
+makeFractalFunctionAcc isAbs degree
   = let  
       polyAcc :: Exp (Float, Float) -> Exp (Float, Float)
-      polyAcc point = if isAbs then computePolynomialAcc (A.lift (A.abs (A.fst point), A.abs (A.snd point))) degree 
-                               else computePolynomialAcc point degree
+      polyAcc point = let absPoint = A.lift (A.abs (A.fst point), A.abs (A.snd point))
+                       in if isAbs 
+                            then computePolynomialAcc absPoint degree 
+                            else computePolynomialAcc point degree
       fractalPointAcc :: Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
-      fractalPointAcc pointZ pointC = A.lift ((A.fst pointZ) A.+ (A.fst pointC), (A.snd pointZ) A.+ (A.snd pointC)) 
+      fractalPointAcc pointZ pointC = A.lift ( A.fst pointZ A.+ A.fst pointC
+                                             , A.snd pointZ A.+ A.snd pointC) 
     in  
       fractalPointAcc . polyAcc                  
   

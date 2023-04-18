@@ -1,10 +1,10 @@
 module ConsoleAcc where
 
-import Data.Array.Accelerate              as A (lift)
-
 import ModelAcc
 
 import Text.Read (readMaybe)
+
+import Data.Array.Accelerate              as A (lift)
 
 
 getGenData :: IO GeneratorData

@@ -1,10 +1,5 @@
-{-# LANGUAGE DeriveAnyClass, 
-             DeriveGeneric, 
-             FlexibleContexts, 
+{-# LANGUAGE FlexibleContexts, 
              TypeFamilies, 
-             TypeOperators, 
-             FlexibleContexts, 
-             StandaloneDeriving, 
              UndecidableInstances, 
              AllowAmbiguousTypes #-}
 
@@ -12,21 +7,22 @@ module ViewAcc (drawHandler, draw, getColorsAcc) where
 
 import ModelAcc
 
+import GHC.Float (int2Float)
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
-import GHC.Float (int2Float)
-
-import Data.Array.Accelerate              as A
+import Data.Array.Accelerate as A
 
 
+-- | Main tick draw function
+--   Returns the cached picture p
 drawHandler :: World -> IO Picture
 drawHandler (MkWorld _ _ _ p _) = return p
 
 
--- | Function called in the last step of the step
---   Input parameters are (unscaled) grid of points and grid of colours
---   By zipping them together we can easily map pointToPicture over them
---   Then the result is condensed into a single picture
+-- | Function called in the last step of rendering process
+--   Input parameters are a grid of (screen space) points and colours
+--   Zipped together, we can easily map pointToPicture over them
+--   The result is condensed into a single picture
 draw :: Grid (Point, ColorAcc) -> Picture
 draw pointAndCol = let pics = gridMap pointToPicture pointAndCol
                     in Pictures . Prelude.map Pictures $ pics
@@ -37,13 +33,11 @@ draw pointAndCol = let pics = gridMap pointToPicture pointAndCol
 pointToPicture :: (Point, ColorAcc) -> Picture
 pointToPicture ((x, y), c) = let (r, g, b, a) = c
                                  c'           = makeColor r g b a
-                              in Translate x y $ Color c' $ Circle 1
+                              in Translate x y $ Color c' $ Circle 1               
 
 
-               
-
-
--- | This function is used to color every pixel based on their escaping step
+-- | This function is used to color every pixel based on their escape step
+--   we use a custom ColorAcc instead of Gloss.Color to facilitate acceleration
 getColorsAcc :: Acc (A.Vector ColorAcc) 
                 -> Acc (Matrix Int) 
                 -> Acc (Matrix ColorAcc)
@@ -51,19 +45,19 @@ getColorsAcc colorsAcc gridAcc = let grid' = rescaleGrid2ColorRangeAcc colorsAcc
                                  in  A.map (float2ColorAcc colorsAcc) grid'
 
 
--- | This function is used to rescale the escaping step into color index range
+-- | This function is used to rescale the escape step into color index range
 rescaleGrid2ColorRangeAcc :: Acc (A.Vector ColorAcc) 
                              -> Acc (Matrix Int) 
                              -> Acc (Matrix Float)
 rescaleGrid2ColorRangeAcc colorsAcc gridAcc = 
   let gridAccFlat = A.flatten gridAcc
-      gridAccMax  = A.toFloating ((A.maximum gridAccFlat) A.!! 0) :: Exp Float
-      gridAccMin  = A.toFloating ((A.minimum gridAccFlat) A.!! 0) :: Exp Float
+      gridAccMax  = A.toFloating (A.maximum gridAccFlat A.!! 0) :: Exp Float
+      gridAccMin  = A.toFloating (A.minimum gridAccFlat A.!! 0) :: Exp Float
       colMax      = A.toFloating . A.subtract 1 . A.length $ colorsAcc :: Exp Float 
       f :: Exp Int -> Exp Float
       f           = \x -> A.ifThenElse (gridAccMax A.== 0) 
-                                       (0.0) 
-                                       (((A.toFloating x) A.- gridAccMin)  A.* (colMax) A./ (gridAccMax - gridAccMin))
+                                       0.0
+                                       ((A.toFloating x A.- gridAccMin)  A.* colMax A./ (gridAccMax - gridAccMin))
    in A.map f gridAcc
 
 
@@ -71,8 +65,8 @@ rescaleGrid2ColorRangeAcc colorsAcc gridAcc =
 --   according to float as index, and mix these colors with the right proportion
 float2ColorAcc :: Acc (A.Vector ColorAcc) -> Exp Float -> Exp ColorAcc
 float2ColorAcc colorsAcc x = let x' = A.ifThenElse (A.isNaN x) 
-                                                   (A.toFloating ((A.length colorsAcc) A.- 1)) 
-                                                   (x) :: Exp Float
+                                                   (A.toFloating (A.length colorsAcc A.- 1)) 
+                                                   x :: Exp Float
                                  floorX = A.floor x'
                                  ceilingX = A.ceiling x'
                                  mixProportion = (x' A.-) . A.toFloating $ floorX :: Exp Float
@@ -101,7 +95,7 @@ mixColorsAcc m1 m2 c1 c2 = let (T4 r1 g1 b1 a1) = c1
                                g1s = g1 A.* g1;    g2s = g2 A.* g2
                                b1s = b1 A.* b1;    b2s = b2 A.* b2
 
-                           in  A.lift ((A.sqrt (m1' A.* r1s A.+ m2' A.* r2s)), 
-                                       (A.sqrt (m1' A.* g1s A.+ m2' A.* g2s)), 
-                                       (A.sqrt (m1' A.* b1s A.+ m2' A.* b2s)), 
-                                       ((m1 A.* a1   A.+ m2 A.* a2) A./ m12))
+                           in  A.lift (A.sqrt (m1' A.* r1s A.+ m2' A.* r2s), 
+                                       A.sqrt (m1' A.* g1s A.+ m2' A.* g2s), 
+                                       A.sqrt (m1' A.* b1s A.+ m2' A.* b2s), 
+                                       (m1 A.* a1   A.+ m2 A.* a2) A./ m12)

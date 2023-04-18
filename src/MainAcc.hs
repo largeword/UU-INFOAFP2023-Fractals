@@ -10,10 +10,10 @@ import ConsoleAcc
 import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact hiding (Vector)
 import Graphics.Gloss.Interface.IO.Game hiding (Vector)
-
---import Debug.Trace
-
 import Data.Array.Accelerate
+
+import Prelude as P
+
 
 main :: IO ()
 main = do
@@ -21,12 +21,12 @@ main = do
     let world = startWorld gd
 
     playIO (InWindow "Fractals" (screenHeight, screenWidth) (0, 0))
-            black                                                        -- Background color
-            60                                                           -- Frames per second
-            world                                                        -- Initial state
-            drawHandler                                                  -- View function
-            inputHandler                                                 -- Event function
-            stepHandlerAcc                                               -- Step function
+            black           -- Background color
+            60              -- Frames per second
+            world           -- Initial state
+            drawHandler     -- View function
+            inputHandler    -- Event function
+            stepHandlerAcc  -- Step function
 
 
 startWorld :: GeneratorData -> World
@@ -36,12 +36,13 @@ startWorld gd = MkWorld
     (1, (0, 0))
     Blank
     True
-    where
-        fracFunc = makeFractalFunctionAcc False 2
-        worldMatrix = fromList (Z:.x:.y) flatList :: Matrix (Float, Float)
-          where  x = Prelude.length gridPoint
-                 y = Prelude.length (head gridPoint)
-                 flatList = concat gridPoint
-                 gridPoint = [[(Prelude.fromIntegral $ x - halfScrW, Prelude.fromIntegral $ y - halfScrH) 
-                              | x <- [0..screenWidth -1]] 
-                              | y <- [0..screenHeight-1]]
+  where
+    fracFunc = makeFractalFunctionAcc False 2
+    worldMatrix = fromList (Z:.x:.y) flatList :: Matrix (Float, Float)
+      where
+        x = P.length gridPoint
+        y = P.length (head gridPoint)
+        flatList = concat gridPoint
+        gridPoint = [[(P.fromIntegral $ x - halfScrW, P.fromIntegral $ y - halfScrH) 
+                     | x <- [0..screenWidth -1]] 
+                      | y <- [0..screenHeight-1]]

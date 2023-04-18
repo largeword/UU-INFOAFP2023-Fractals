@@ -1,23 +1,20 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, FlexibleContexts, TypeFamilies, TypeOperators, FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, TypeFamilies #-}
 
 module ControllerAcc where
 
 import ModelAcc
 import ViewAcc
 import ConsoleAcc
+import GeneratorAcc
 
 import Data.List
 import Data.Ord hiding (Down)
 
 import Graphics.Gloss hiding (scale)
 import Graphics.Gloss.Interface.IO.Interact hiding (scale)
-
 import Data.Array.Accelerate              as A
 import Data.Array.Accelerate.LLVM.Native  as CPU
 import Data.Array.Accelerate.LLVM.PTX     as GPU
-import Data.Array.Accelerate.Interpreter  as I
-
-import GeneratorAcc as GA
 
 import Debug.Trace
 
@@ -86,7 +83,7 @@ stepHandlerAcc :: Float -> World -> IO World
 stepHandlerAcc _ w@(MkWorld screen d tf _ True) = trace "Renderin... Please stand by" $ 
   let picture  = draw                            -- turned into a pretty picture 'v'
                . GA.arr2Grid $ CPU.run           -- running accelerated process  :: Grid (Point, Color)
-               . A.zip (A.use screen)    -- zipping colour with position :: Matrix (Point, Color)
+               . A.zip (A.use screen)            -- zipping colour with position :: Matrix (Point, Color)
                . getColorsAcc (A.use colorList)  -- turned into colored grid     :: Matrix Color
                . GA.getEscapeStepsAcc            -- turned into numbered grid    :: Matrix Int
                . GA.getSequencesAcc d            -- turned into sequenced grid   :: Matrix [Point]
@@ -130,9 +127,9 @@ scale grid (zoom, (rOff, iOff)) = gridMap f grid
 scaleAcc :: Acc (Matrix (Float, Float)) -> (ZoomScale, Translation) -> Acc (Matrix (Float, Float))
 scaleAcc gridAcc (zoom, (rOff, iOff)) = A.map f gridAcc
   where
-    zoom' = (A.lift zoom) A.* (A.lift scaleFactor)
+    zoom' = A.lift zoom A.* A.lift scaleFactor
     f :: Exp (Float, Float) -> Exp (Float, Float)
     f point = let r = A.fst point 
                   i = A.snd point in
-              A.lift (r A.* zoom' A.+ (A.lift rOff), i A.* zoom' A.+ (A.lift iOff))
+              A.lift (r A.* zoom' A.+ A.lift rOff, i A.* zoom' A.+ A.lift iOff)
 
