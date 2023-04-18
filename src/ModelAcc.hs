@@ -116,7 +116,7 @@ gridMap f = P.map (P.map f)
 -- | Default color list
 --   https://colorswall.com/palette/128774
 colorList :: A.Vector ColorAcc
-colorList = fromList (Z:.6) $ P.map toFloats rbgs
+colorList = fromList (Z:.6) $ P.map toFloats rgbs
   where  --    R    G    B   A
     rgbs = [ (43.0 , 192.0, 232.0, 255.0)
            , (246.0, 203.0, 102.0, 255.0)
