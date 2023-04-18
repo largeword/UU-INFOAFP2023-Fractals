@@ -1,6 +1,6 @@
 module Console where
 
-import Model
+import ModelAcc
 
 import Text.Read (readMaybe)
 
