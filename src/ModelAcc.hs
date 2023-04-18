@@ -4,7 +4,7 @@ import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
 
-import Data.Array.Accelerate hiding (even, map)
+import Data.Array.Accelerate as A
 import Prelude as P
 
 -- Separate properties of the screen
@@ -96,8 +96,8 @@ makeFractalFunction isAbs degree            -- do we want decimal degrees? like 
 -- for now we assume that degree n is a positive integer 
 computePolynomial :: Point -> Int -> Point
 computePolynomial z 1 = z  
-computePolynomial z n | n <= 0    = error ("Non-positive number given as argument: " ++ 
-                                           show n ++ ". Please give a positive number") 
+computePolynomial z n | n P.<= 0    = error ("Non-positive number given as argument: " ++ 
+                                           show n P.++ ". Please give a positive number") 
                       | even n    = computePolynomial (complexMul z z) (n `div` 2)
                       | otherwise = complexMul z $ computePolynomial z (n-1)
 
@@ -115,7 +115,7 @@ gridMap f = map (map f)
 
 -- | Default color list
 --   https://colorswall.com/palette/128774
-colorList :: Vector ColorAcc
+colorList :: A.Vector ColorAcc
 colorList = fromList (Z:.6) $ map toFloats rbgs
   where  --    R    G    B   A
     rgbs = [ (43.0 , 192.0, 232.0, 255.0)
