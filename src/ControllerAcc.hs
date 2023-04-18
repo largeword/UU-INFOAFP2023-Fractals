@@ -84,8 +84,8 @@ stepHandlerAcc :: Float -> World -> IO World
 stepHandlerAcc _ w@(MkWorld screen d tf _ True) =
   let picture  = draw                            -- turned into a pretty picture 'v'
                . GA.arr2Grid $ CPU.run           -- running accelerated process  :: Grid (Point, Color)
-               . A.zipWith (\a b -> (a, b)) (A.use screen)    -- zipping colour with position :: Matrix (Point, Color)
-               . getColorsAcc $ A.use colorList  -- turned into colored grid     :: Matrix Color
+               . A.zipWith (\a b -> lift (unlift a, unlift b)) (A.use screen)    -- zipping colour with position :: Matrix (Point, Color)
+               . getColorsAcc (A.use colorList)  -- turned into colored grid     :: Matrix Color
                . GA.getEscapeStepsAcc            -- turned into numbered grid    :: Matrix Int
                . GA.getSequencesAcc              -- turned into sequenced grid   :: Matrix [Point]
                . (`scaleAcc` tf)                 -- Scaled to our parameters     :: Matrix Point
