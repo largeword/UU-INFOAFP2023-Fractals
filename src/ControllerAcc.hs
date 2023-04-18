@@ -39,7 +39,7 @@ inputHandler (EventKey (Char        'r'       ) Down _ _     ) w =
              , isChanged = True}
 inputHandler (EventKey (Char        ' '       ) Down _ _     ) w =
   do gd <- getGenData
-     return $ w {gData      = gd
+     return $ w { gData      = gd
                 , isChanged = True}
 
 
