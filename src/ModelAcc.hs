@@ -1,4 +1,4 @@
-module ModelAcc where
+module ModelAcc (hiding Z) where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
@@ -30,8 +30,8 @@ type Translation = (Float, Float)
 
 -- | A type synonym to define the abstract point calculation function
 --  The first argument is the starting point z and the second the complex parameter c
-type Z = Point
-type C = Point
+newtype Z = Point
+newtype C = Point
 
 type FractalFunction = Z -> C -> Point  
 
