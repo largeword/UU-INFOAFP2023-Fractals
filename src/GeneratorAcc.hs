@@ -19,7 +19,7 @@ import Data.Array.Accelerate.Sugar.Elt
 
 import Data.List.Split (chunksOf)
 
-import Model (Grid)
+import ModelAcc
 
 
 -- let mat1 = fromList (Z:.50:.50) [0,0.001 ..]
@@ -31,28 +31,47 @@ import Model (Grid)
 -- let mat = fromList (Z:.4:.2) [(1,2),(101,200),(1,2),(100,2),(2,3),(100,30),(1,2),(3,3)]
 
 
-getSequencesAcc :: Acc (Array ((Z :. Int) :. Int) (Float, Float)) -> Acc (Array (((Z :. Int) :. Int) :. Int) (Float, Float))
-getSequencesAcc gridAcc = A.map getValueOnStepAcc gridAcc''
+-- let mat = fromList (Z:.4:.2) [(1,2),(101,200),(1,2),(100,2),(2,3),(100,30),(1,2),(3,3)]
+-- A.replicate (A.constant (Z :. All :. All :. (4::Int))) (use mat)
+{-
+iterateExpr :: GeneratorData -> Exp (Float, Float) -> Exp (Float, Float)
+iterateExpr genData point = lift (zx A.** 2 A.- zy A.** 2 + 0, 2 A.* zx A.* zy + 0)
+                    where -- point = A.snd idxPt
+                          zx = A.fst point
+                          zy = A.snd point
+                          fracFunc = func     genData 
+                          c        = offset   genData
+                          z        = position genData
+-}                          
+
+
+
+getSequencesAcc :: GeneratorData -> Acc (Array ((Z :. Int) :. Int) (Float, Float)) -> Acc (Array (((Z :. Int) :. Int) :. Int) (Float, Float))
+getSequencesAcc genData gridAcc = A.map (getValueOnStepAcc genData) gridAcc''
                           where gridAcc' = A.replicate (A.constant (Z :. All :. All :. (100::Int))) gridAcc
                                 gridAcc'' = A.indexed gridAcc'
                                 -- gridShape = shape gridAcc'
                                 -- gridAccFlat = A.flatten gridAcc''
 
+iterateExpr :: GeneratorData -> Exp (Float, Float) -> Exp (Float, Float)
+iterateExpr genData = fracFunc c
+                      where -- point = A.snd idxPt
+                            fracFunc = func     genData 
+                            c        = offset   genData
+                            z        = position genData
 
-getValueOnStepAcc :: Exp (((Z :. Int) :. Int) :. Int, (Float, Float)) -> Exp (Float, Float)
-getValueOnStepAcc idxWithPoint = A.iterate (lift t) iterateExpr point
+getValueOnStepAcc :: GeneratorData -> Exp (((Z :. Int) :. Int) :. Int, (Float, Float)) -> Exp (Float, Float)
+getValueOnStepAcc genData idxWithPoint = A.ifThenElse interateFlag
+                                                      (A.iterate (lift t) (iterateExpr genData {position = point}) point)
+                                                      (A.iterate (lift t) (iterateExpr genData {offset = point}) point)
                                where idx = A.fst idxWithPoint
                                      (T3 x y t) = A.unindex3 idx  
                                      point = A.snd idxWithPoint
+                                     
+                                     interateFlag = A.lift (parameter genData Prelude.== VarZ) :: Exp Bool
 
 
--- let mat = fromList (Z:.4:.2) [(1,2),(101,200),(1,2),(100,2),(2,3),(100,30),(1,2),(3,3)]
--- A.replicate (A.constant (Z :. All :. All :. (4::Int))) (use mat)
-iterateExpr :: Exp (Float, Float) -> Exp (Float, Float)
-iterateExpr point = lift (zx A.** 2 A.- zy A.** 2 + 0, 2 A.* zx A.* zy + 0)
-                    where -- point = A.snd idxPt
-                          zx = A.fst point
-                          zy = A.snd point
+
 
 
 -- let mat = fromList (Z:.2:.2:.2) [(1,2),(101,200),(1,2),(100,2),(2,3),(100,30),(1,2),(3,3)]
