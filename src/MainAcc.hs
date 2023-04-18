@@ -5,7 +5,7 @@ module Main where
 import ModelAcc
 import ControllerAcc
 import ViewAcc
-import Console
+import ConsoleAcc
 
 import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact hiding (Vector)
@@ -37,7 +37,7 @@ startWorld gd = MkWorld
     Blank
     True
     where
-        fracFunc = makeFractalFunction False 2
+        fracFunc = makeFractalFunctionAcc False 2
         worldMatrix = fromList (Z:.x:.y) flatList :: Matrix (Float, Float)
           where  x = Prelude.length gridPoint
                  y = Prelude.length (head gridPoint)

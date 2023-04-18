@@ -1,10 +1,13 @@
+{-# LANGUAGE TypeOperators #-}
+
 module ModelAcc where
 
 import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
 
-import Data.Array.Accelerate              as A (Matrix, lift, fst, snd, abs, Exp, (*), (-), (+))
+import Data.Array.Accelerate              as A
+import Prelude as P
 
 -- Separate properties of the screen
 screenWidth :: Int
@@ -38,7 +41,7 @@ type FractalFunctionAcc = ZAcc -> CAcc -> Exp (Float, Float)
 data VarParameter = VarZ 
                   | VarC 
                   | VarZandC
-                  deriving (Eq)
+                  deriving (P.Eq)
 
 -- | Contains all information necessary to compute a fractal with a ZFunction
 data GeneratorData = GenData
@@ -60,17 +63,17 @@ data World = MkWorld
 
 data Zoom = In
           | Out
-  deriving (Eq, Show)
+  deriving (P.Eq, Show)
 
 data Direction = Left'
                | Right'
                | Up'
                | Down'
-  deriving (Eq, Show)
+  deriving (P.Eq, Show)
 
 data EventAction = Move Direction
                  | Zoom Zoom
-  deriving (Eq, Show)
+  deriving (P.Eq, Show)
   
 -- | Arguments: Red Green Blue Alpha (all values should be in [0..1])
 type ColorAcc = (Float, Float, Float, Float)
@@ -98,9 +101,9 @@ makeFractalFunctionAcc isAbs degree            -- do we want decimal degrees? li
 -- for now we assume that degree n is a positive integer 
 computePolynomialAcc :: Exp (Float, Float) -> Int -> Exp (Float, Float)
 computePolynomialAcc z 1 = z  
-computePolynomialAcc z n | n <= 0    = error ("Non-positive number given as argument: " ++ 
-                                              show n ++ ". Please give a positive number") 
-                         | even n    = computePolynomialAcc (complexMulAcc z z) (n `div` 2)
+computePolynomialAcc z n | n P.<= 0    = error ("Non-positive number given as argument: " P.++ 
+                                              show n P.++ ". Please give a positive number") 
+                         | P.even n    = computePolynomialAcc (complexMulAcc z z) (n `div` 2)
                          | otherwise = complexMulAcc z $ computePolynomialAcc z (n-1)
 
 
@@ -118,12 +121,12 @@ complexMulAcc point1 point2 = A.lift ( a A.* c A.- b A.* d
 type Grid a = [[a]]
 
 gridMap :: (a -> b) -> Grid a -> Grid b
-gridMap f = map (map f)
+gridMap f = P.map (P.map f)
 
 -- | Default color list
 --   https://colorswall.com/palette/128774
 colorList :: A.Vector ColorAcc
-colorList = fromList (Z:.6) $ P.map toFloats rgbs
+colorList = fromList dim $ P.map toFloats rgbs
   where  --    R    G    B   A
     rgbs = [ (43.0 , 192.0, 232.0, 255.0)
            , (246.0, 203.0, 102.0, 255.0)
@@ -132,4 +135,6 @@ colorList = fromList (Z:.6) $ P.map toFloats rgbs
            , (160.0, 172.0, 180.0, 255.0)
            , (68.0 , 62.0 , 94.0 , 255.0)]
     toFloats (a, b, c, d) = (a / 255, b / 255, c / 255, d / 255)
+    dim :: Z :. Int
+    dim = Z :. 6
 

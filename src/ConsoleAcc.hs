@@ -1,4 +1,4 @@
-module Console where
+module ConsoleAcc where
 
 import Data.Array.Accelerate              as A (lift)
 
@@ -133,26 +133,26 @@ mandelbrotDefault = GenData { position     = A.lift (0 :: Float, 0 :: Float)
                             , offset       = A.lift (0 :: Float, 0 :: Float)
                             , escapeRadius = undefined
                             , parameter    = VarC
-                            , func         =  makeFractalFunctionAcc False 2 }
+                            , func         = makeFractalFunctionAcc False 2 }
 
 juliaDefault :: GeneratorData
 juliaDefault = GenData { position     = A.lift (0 :: Float, 0 :: Float)
                        , offset       = A.lift (0 :: Float, 0 :: Float)
                        , escapeRadius = undefined
                        , parameter    = VarZ
-                       , func         =  makeFractalFunctionAcc False 2 }
+                       , func         = makeFractalFunctionAcc False 2 }
 
 burningShipDefault :: GeneratorData
 burningShipDefault = GenData { position     = A.lift (0 :: Float, 0 :: Float)
                              , offset       = A.lift (0 :: Float, 0 :: Float)
                              , escapeRadius = undefined
                              , parameter    = VarC
-                             , func         =  makeFractalFunctionAcc True 2 }
+                             , func         = makeFractalFunctionAcc True 2 }
 
 burningJuliaDefault :: GeneratorData
 burningJuliaDefault = GenData { position     = A.lift (0 :: Float, 0 :: Float)
                               , offset       = A.lift (0 :: Float, 0 :: Float)
                               , escapeRadius = undefined
                               , parameter    = VarZ
-                              , func         =  makeFractalFunctionAcc True 2 }
+                              , func         = makeFractalFunctionAcc True 2 }
 

@@ -4,7 +4,7 @@ module ControllerAcc where
 
 import ModelAcc
 import ViewAcc
-import Console
+import ConsoleAcc
 
 import Data.List
 import Data.Ord hiding (Down)
@@ -31,7 +31,7 @@ inputHandler :: Event -> World -> IO World
 --   Such as selecting a point for which to generate the Julia
 --   or (potentially in the future) using the mousewheel to zoom
 inputHandler (EventKey (MouseButton LeftButton) Down _ (x, y)) w = 
-  let newData = (gData w) { offset = (x / 125, y / 125)}
+  let newData = (gData w) { offset = lift (x / 125, y / 125)}
    in return $ w {gData = newData, isChanged = True}
 inputHandler (EventKey (Char        'r'       ) Down _ _     ) w = 
   return $ w { transform = (1, (0, 0))
@@ -83,13 +83,13 @@ parseEvent                 _ =  Nothing
 
 -- | Accelerated version
 stepHandlerAcc :: Float -> World -> IO World
-stepHandlerAcc _ w@(MkWorld screen d tf _ True) =
+stepHandlerAcc _ w@(MkWorld screen d tf _ True) = trace "Renderin... Please stand by" $ 
   let picture  = draw                            -- turned into a pretty picture 'v'
                . GA.arr2Grid $ CPU.run           -- running accelerated process  :: Grid (Point, Color)
                . A.zip (A.use screen)    -- zipping colour with position :: Matrix (Point, Color)
                . getColorsAcc (A.use colorList)  -- turned into colored grid     :: Matrix Color
                . GA.getEscapeStepsAcc            -- turned into numbered grid    :: Matrix Int
-               . GA.getSequencesAcc              -- turned into sequenced grid   :: Matrix [Point]
+               . GA.getSequencesAcc d            -- turned into sequenced grid   :: Matrix [Point]
                . (`scaleAcc` tf)                 -- Scaled to our parameters     :: Matrix Point
                $ A.use screen                    -- The unscaled default screen  :: Matrix Point
    in return $ w { currentPicture = picture
