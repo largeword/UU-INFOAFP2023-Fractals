@@ -96,9 +96,9 @@ makeFractalFunction isAbs degree            -- do we want decimal degrees? like 
 -- for now we assume that degree n is a positive integer 
 computePolynomial :: Point -> Int -> Point
 computePolynomial z 1 = z  
-computePolynomial z n | n P.<= 0    = error ("Non-positive number given as argument: " ++ 
+computePolynomial z n | n P.<= 0    = error ("Non-positive number given as argument: " P.++ 
                                            show n P.++ ". Please give a positive number") 
-                      | even n    = computePolynomial (complexMul z z) (n `div` 2)
+                      | P.even n    = computePolynomial (complexMul z z) (n `div` 2)
                       | otherwise = complexMul z $ computePolynomial z (n-1)
 
 
@@ -111,12 +111,12 @@ complexMul (a, b) (c, d) = ( a * c - b * d
 type Grid a = [[a]]
 
 gridMap :: (a -> b) -> Grid a -> Grid b
-gridMap f = map (map f)
+gridMap f = P.map (P.map f)
 
 -- | Default color list
 --   https://colorswall.com/palette/128774
 colorList :: A.Vector ColorAcc
-colorList = fromList (Z:.6) $ map toFloats rbgs
+colorList = fromList (Z:.6) $ P.map toFloats rbgs
   where  --    R    G    B   A
     rgbs = [ (43.0 , 192.0, 232.0, 255.0)
            , (246.0, 203.0, 102.0, 255.0)
