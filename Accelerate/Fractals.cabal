@@ -54,3 +54,4 @@ executable Fractals
     default-language: Haskell2010
 
     ghc-options:      -threaded
+                      -main-is MainAcc
