@@ -4,18 +4,18 @@ This is the group project (rendering fractals) repository of [Advanced Functiona
 Please fine the excutable file at the release section.
 
 Controlling keys: \
-                 w -> Move Up\
-                 a -> Move Left\
-                 s -> Move Down\
-                 d -> Move Right\
-                 KeyUp -> Move Up\
-                 KeyLeft -> Move Left\
-                 KeyDown -> Move Down\
-                 KeyRight -> Move Right\
-                 q -> Zoom Out\
-                 e -> Zoom In\
-                 r -> Reset Offset and Zooming\
-                 g -> Re-generate Fractal\
+                 &emsp; w -> Move Up\
+                 &emsp; a -> Move Left\
+                 &emsp; s -> Move Down\
+                 &emsp; d -> Move Right\
+                 &emsp; KeyUp -> Move Up\
+                 &emsp; KeyLeft -> Move Left\
+                 &emsp; KeyDown -> Move Down\
+                 &emsp; KeyRight -> Move Right\
+                 &emsp; q -> Zoom Out\
+                 &emsp; e -> Zoom In\
+                 &emsp; r -> Reset Offset and Zooming\
+                 &emsp; g -> Re-generate Fractal
                  
 **Overleaf URL's:**
   1. Project proposal: https://github.com/largeword/UU-INFOAFP2023-Fractals/blob/main/Project_Proposal.pdf
