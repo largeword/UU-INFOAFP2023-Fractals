@@ -3,7 +3,7 @@ This is the group project (rendering fractals) repository of [Advanced Functiona
 
 Please fine the excutable file at the release section.
 
-Controlling keys: \
+**Controlling keys:** \
                  &emsp; w -> Move Up\
                  &emsp; a -> Move Left\
                  &emsp; s -> Move Down\
@@ -17,7 +17,7 @@ Controlling keys: \
                  &emsp; r -> Reset Offset and Zooming\
                  &emsp; g -> Re-generate Fractal
                  
-**Overleaf URL's:**
-  1. Project proposal: https://github.com/largeword/UU-INFOAFP2023-Fractals/blob/main/Project_Proposal.pdf
-  2. Status report: https://www.overleaf.com/1143175371wzcbsvfvtxpv
-  3. Final report: https://www.overleaf.com/1151294891cwpktdhdrmkh
+**Project docs:**
+  1. [Project proposal](https://github.com/largeword/UU-INFOAFP2023-Fractals/blob/main/docs/INFOAFP_Project_Proposal.pdf)
+  2. [Status report](https://github.com/largeword/UU-INFOAFP2023-Fractals/blob/main/docs/INFOAFP_Project_Status_Report.pdf)
+  3. [Final report](https://www.overleaf.com/1151294891cwpktdhdrmkh) !need to replace this overleaf link!
