@@ -18,6 +18,6 @@ Controlling keys: \
                  &emsp; g -> Re-generate Fractal
                  
 **Overleaf URL's:**
-  1. Project proposal: https://github.com/largeword/UU-INFOAFP2023-Fractals/blob/main/Project_Proposal.pdf
-  2. Status report: https://www.overleaf.com/1143175371wzcbsvfvtxpv
+  1. Project proposal: https://github.com/largeword/UU-INFOAFP2023-Fractals/blob/main/docs/INFOAFP_Project_Proposal.pdf
+  2. Status report: https://github.com/largeword/UU-INFOAFP2023-Fractals/blob/main/docs/INFOAFP_Project_Status_Report.pdf
   3. Final report: https://www.overleaf.com/1151294891cwpktdhdrmkh
