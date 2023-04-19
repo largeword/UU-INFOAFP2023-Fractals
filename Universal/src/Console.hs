@@ -1,10 +1,8 @@
-module ConsoleAcc where
+module Console where
 
-import ModelAcc
+import Model
 
 import Text.Read (readMaybe)
-
-import Data.Array.Accelerate              as A (lift)
 
 
 getGenData :: IO GeneratorData
@@ -48,12 +46,12 @@ getSpecifiedImplementation = do
     absVal   <- getAbsValue
     polyDgr  <- getPolyDegree
 
-    let fracFunc = makeFractalFunctionAcc absVal polyDgr
-        genData  = GenData { position     = A.lift (0 :: Float, 0 :: Float)
-                           , offset       = A.lift (0 :: Float, 0 :: Float)
+    let fracFunc = makeFractalFunction absVal polyDgr
+        genData  = GenData { position     = (0 :: Float, 0 :: Float)
+                           , offset       = (0 :: Float, 0 :: Float)
                            , escapeRadius = undefined
                            , parameter    = varParam
-                           , func         = makeFractalFunctionAcc absVal polyDgr}
+                           , func         = fracFunc}
 
     return genData
 
@@ -126,29 +124,29 @@ getDefaultImplementation = do
 
 
 mandelbrotDefault :: GeneratorData
-mandelbrotDefault = GenData { position     = A.lift (0 :: Float, 0 :: Float)
-                            , offset       = A.lift (0 :: Float, 0 :: Float)
+mandelbrotDefault = GenData { position     = (0 :: Float, 0 :: Float)
+                            , offset       = (0 :: Float, 0 :: Float)
                             , escapeRadius = undefined
                             , parameter    = VarC
-                            , func         = makeFractalFunctionAcc False 2 }
+                            , func         = makeFractalFunction False 2 }
 
 juliaDefault :: GeneratorData
-juliaDefault = GenData { position     = A.lift (0 :: Float, 0 :: Float)
-                       , offset       = A.lift (0 :: Float, 0 :: Float)
+juliaDefault = GenData { position     = (0 :: Float, 0 :: Float)
+                       , offset       = (0 :: Float, 0 :: Float)
                        , escapeRadius = undefined
                        , parameter    = VarZ
-                       , func         = makeFractalFunctionAcc False 2 }
+                       , func         = makeFractalFunction False 2 }
 
 burningShipDefault :: GeneratorData
-burningShipDefault = GenData { position     = A.lift (0 :: Float, 0 :: Float)
-                             , offset       = A.lift (0 :: Float, 0 :: Float)
+burningShipDefault = GenData { position     = (0 :: Float, 0 :: Float)
+                             , offset       = (0 :: Float, 0 :: Float)
                              , escapeRadius = undefined
                              , parameter    = VarC
-                             , func         = makeFractalFunctionAcc True 2 }
+                             , func         = makeFractalFunction True 2 }
 
 burningJuliaDefault :: GeneratorData
-burningJuliaDefault = GenData { position     = A.lift (0 :: Float, 0 :: Float)
-                              , offset       = A.lift (0 :: Float, 0 :: Float)
+burningJuliaDefault = GenData { position     = (0 :: Float, 0 :: Float)
+                              , offset       = (0 :: Float, 0 :: Float)
                               , escapeRadius = undefined
                               , parameter    = VarZ
-                              , func         = makeFractalFunctionAcc True 2 }
+                              , func         = makeFractalFunction True 2 }

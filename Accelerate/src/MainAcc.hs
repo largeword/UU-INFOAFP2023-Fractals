@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts
            , TypeFamilies #-}
 
-module Main where
+module MainAcc where
 
 import Prelude as P
 import ModelAcc

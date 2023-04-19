@@ -28,19 +28,12 @@ executable Fractals
     main-is:          MainAcc.hs
 
     -- Modules included in this executable, other than Main.
-<<<<<<<< HEAD:Universal/Fractals.cabal
-    other-modules:    Controller
-                 ,    Model
-                 ,    View
-                 ,    Generator
-                 ,    Console
-========
     other-modules:    ControllerAcc
                  ,    ModelAcc
                  ,    ViewAcc
                  ,    GeneratorAcc
                  ,    ConsoleAcc
->>>>>>>> accelerate-clean:Accelerate/Fractals.cabal
+
                  
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
