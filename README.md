@@ -1,4 +1,4 @@
-# UU-INFOAFP2023-Fractals
+# UU-INFOAFP2023-Fraskell: Exploring Fractals in Haskell
 This is the group project (rendering fractals) repository of [Advanced Functional Programming 2022/2023](https://www.cs.uu.nl/docs/vakken/afp/project.html) in Utrecht University.
 
 Please fine the excutable file at the release section.
