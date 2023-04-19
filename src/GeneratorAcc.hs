@@ -1,11 +1,12 @@
-{-# LANGUAGE FlexibleContexts, 
-             TypeFamilies, 
-             TypeOperators, 
-             UndecidableInstances, 
-             AllowAmbiguousTypes #-}
+{-# LANGUAGE FlexibleContexts
+           , TypeFamilies
+           , TypeOperators
+           , UndecidableInstances
+           , AllowAmbiguousTypes #-}
 
 module GeneratorAcc (getSequencesAcc, getEscapeStepsAcc, grid2Arr, arr2Grid) where
 
+import Prelude as P
 import ModelAcc
 
 import Data.List.Split (chunksOf)
@@ -14,15 +15,13 @@ import Data.Array.Accelerate              as A
 import Data.Array.Accelerate.LLVM.Native  as CPU
 import Data.Array.Accelerate.LLVM.PTX     as GPU
 
-import Prelude as P
-
 
 -- | Computes the list of sequenced applications of our fractal function over the grid
 --   We create a replicated indexed cubic grid the size of the escape radius
 --   and apply iterations over this map
 getSequencesAcc :: GeneratorData -> Acc (Matrix (Float, Float)) -> Acc (Cubic (Float, Float))
 getSequencesAcc genData gridAcc = A.map (getValueOnStepAcc genData) gridAcc''
-  where 
+  where
     gridAcc'  = A.replicate (A.constant (Z :. All :. All :. (t::Int))) gridAcc
     gridAcc'' = A.indexed gridAcc'
     t         = escapeRadius genData
@@ -30,18 +29,18 @@ getSequencesAcc genData gridAcc = A.map (getValueOnStepAcc genData) gridAcc''
 -- | Iterate the fracFunc over a certain index
 --   The third dimension of the index, t, defines how much we interate
 getValueOnStepAcc :: GeneratorData -> Exp (((Z :. Int) :. Int) :. Int, (Float, Float)) -> Exp (Float, Float)
-getValueOnStepAcc genData idxWithPoint = A.iterate (lift t) (`fracFunc` c) z 
-  where 
+getValueOnStepAcc genData idxWithPoint = A.iterate (lift t) (`fracFunc` c) z
+  where
     idx        = A.fst idxWithPoint
-    (T3 x y t) = A.unindex3 idx  
+    (T3 x y t) = A.unindex3 idx
     point      = A.snd idxWithPoint
-    genData'   = case parameter genData of 
-                   VarC -> genData {offset = point}
-                   VarZ -> genData {position = point} 
+    genData'   = case parameter genData of
+                   VarZ -> genData {position = point}
+                   VarC -> genData {offset   = point}
     fracFunc   = func genData'
-    z          = offset genData'
-    c          = position genData' 
-    
+    z          = position genData'
+    c          = offset genData'
+
 
 -- | Filter a cubic into a matrix by checking how many of the points cross the treshold
 getEscapeStepsAcc :: Acc (Cubic (Float, Float)) -> Acc (Matrix Int)
@@ -49,11 +48,11 @@ getEscapeStepsAcc gridAcc = A.asnd $ A.filter (A.== lift True) (A.map crossThres
 
 -- | Check whether a point crosses the threshold
 --   Currently this is set to 10
---   Reducing the square root from the computation, we perform it with 10^2: 100
+--   To check distance, we perform the pythagorean formula with C = 10^2: 100
 crossThreshouldAcc :: Exp (Float, Float) -> Exp Bool
 crossThreshouldAcc point = A.ifThenElse (A.isNaN zx A.|| A.isNaN zy)
-                                        (lift False) 
-                                        ((zx A.** 2 + zy A.** 2) A.< 100)
+                                        (lift False)
+                                        ((zx A.* zx + zy A.* zy) A.< 100)
   where
     zx = A.fst point
     zy = A.snd point
@@ -79,4 +78,3 @@ arr2Grid accMtx = reshapeList flatList x
 -- reshape a list
 reshapeList :: [a] -> Int -> [[a]]
 reshapeList xs xPixel = chunksOf xPixel xs
-

@@ -2,12 +2,13 @@
 
 module ModelAcc where
 
+import Prelude as P
+
 import Graphics.Gloss hiding (Vector)
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
 import Data.Array.Accelerate              as A
 
-import Prelude as P
 
 -- Separate properties of the screen
 screenWidth :: Int
@@ -19,7 +20,7 @@ screenHeight = 1000
 halfScrW :: Int
 halfScrW = screenWidth `div` 2
 
-halfScrH :: Int 
+halfScrH :: Int
 halfScrH = screenHeight `div` 2
 
 scaleFactor :: Float
@@ -35,17 +36,17 @@ type CAcc = Exp (Float, Float)
 type FractalFunctionAcc = ZAcc -> CAcc -> Exp (Float, Float)
 
 -- | Describes which function parameter will be varied in the fractal generation function
-data VarParameter = VarZ 
-                  | VarC 
+data VarParameter = VarZ
+                  | VarC
                   deriving (P.Eq)
 
 -- | Contains all information necessary to compute a fractal with a ZFunction
 data GeneratorData = GenData
-  { position         :: Exp (Float, Float)  -- Other name for z in fractal function?
+  { position         :: Exp (Float, Float)  -- Other name for z in fractal function
   , offset           :: Exp (Float, Float)  -- Offset c in the fractal polynomial
   , escapeRadius     :: Int                 -- The amount of iterations we perform
   , parameter        :: VarParameter        -- Describes which function parameterr will be varied
-  , func             :: !FractalFunctionAcc -- Strictness required to ensure we do not calculate  
+  , func             :: !FractalFunctionAcc -- Strictness required to ensure we do not calculate
   }                                         -- the same function every iteration
 
 -- | Simply type synonyms to describe transformation: Zooming and translation
@@ -75,38 +76,39 @@ data Direction = Left'
 data EventAction = Move Direction
                  | Zoom Zoom
   deriving (P.Eq, Show)
-  
+
 -- | Arguments: Red Green Blue Alpha (all values should be in [0..1])
 type ColorAcc = (Float, Float, Float, Float)
 type Cubic = Array DIM3
 
----- Functions for generating the fractal
+
+---- Functions for generating the fractal -----
 
 -- | Create the fractal characteristic function based on user input
---   First input argument: take absolute of starting point (|Re(z)| + |Im(z)|)^n + c if True 
---   Second: degree n of the polynomial z^n + c 
+--   First input argument: take absolute of starting point (|Re(z)| + |Im(z)|)^n + c if True
+--   Second: degree n of the polynomial z^n + c
 --   Polynomial degrees <= 0 or non-integer polynomial degrees are not supported
 makeFractalFunctionAcc :: Bool -> Int -> FractalFunctionAcc
 makeFractalFunctionAcc isAbs degree
-  = let  
+  = let
       polyAcc :: Exp (Float, Float) -> Exp (Float, Float)
       polyAcc point = let absPoint = A.lift (A.abs (A.fst point), A.abs (A.snd point))
-                       in if isAbs 
-                            then computePolynomialAcc absPoint degree 
+                       in if isAbs
+                            then computePolynomialAcc absPoint degree
                             else computePolynomialAcc point degree
       fractalPointAcc :: Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
       fractalPointAcc pointZ pointC = A.lift ( A.fst pointZ A.+ A.fst pointC
-                                             , A.snd pointZ A.+ A.snd pointC) 
-    in  
-      fractalPointAcc . polyAcc                  
-  
+                                             , A.snd pointZ A.+ A.snd pointC)
+    in
+      fractalPointAcc . polyAcc
+
 
 -- | compute polynomial values given a complex number z = Re(z) + Im(z),
--- for now we assume that degree n is a positive integer 
+-- for now we assume that degree n is a positive integer
 computePolynomialAcc :: Exp (Float, Float) -> Int -> Exp (Float, Float)
-computePolynomialAcc z 1 = z  
-computePolynomialAcc z n | n P.<= 0    = error ("Non-positive number given as argument: " P.++ 
-                                              show n P.++ ". Please give a positive number") 
+computePolynomialAcc z 1 = z
+computePolynomialAcc z n | n P.<= 0    = error ("Non-positive number given as argument: " P.++
+                                              show n P.++ ". Please give a positive number")
                          | P.even n    = computePolynomialAcc (complexMulAcc z z) (n `div` 2)
                          | otherwise = complexMulAcc z $ computePolynomialAcc z (n-1)
 
@@ -141,4 +143,3 @@ colorList = fromList dim $ P.map toFloats rgbs
     toFloats (a, b, c, d) = (a / 255, b / 255, c / 255, d / 255)
     dim :: Z :. Int
     dim = Z :. 6
-

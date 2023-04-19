@@ -14,11 +14,11 @@ getGenData = do
     putStrLn "Initialisation of generatorData complete"
     putStrLn "Please find your fractal in the application window."
     return gd'
-  
+
 getGeneratorBase :: IO GeneratorData
 getGeneratorBase = do
-  putStrLn "\nWould you like to launch a default implementation? [y|n]\n" 
-  
+  putStrLn "\nWould you like to launch a default implementation? [y|n]\n"
+
   c <- getChar
   _ <- getChar
   case c of
@@ -32,14 +32,13 @@ getEscapeRadius gd = do
   putStrLn "\nHow many escape steps would you like to count? (default 100)"
   putStrLn "The more escape steps, the higher fidelity fractals are,"
   putStrLn "but the slower they are computed\n"
-  
+
   strAns <- getLine
   let intAns = readMaybe strAns :: Maybe Int
   case intAns of
       Nothing -> do putStrLn "Unable to parse input.  Please make sure to enter an integer value"
                     getEscapeRadius gd
       Just a  -> return gd {escapeRadius = a}
-    
 
 
 
@@ -113,7 +112,7 @@ getDefaultImplementation = do
     putStrLn "[3] Burning Ship (Mandelbrot)"
     putStrLn "[4] Burning Ship (Julia)"
     putStrLn "[b] Back\n"
-    
+
     c <- getChar -- getChar only seems to read an input after the user presses enter
     _ <- getChar -- this empty read parses the newline character and throws it away
     case c of
@@ -153,4 +152,3 @@ burningJuliaDefault = GenData { position     = A.lift (0 :: Float, 0 :: Float)
                               , escapeRadius = undefined
                               , parameter    = VarZ
                               , func         = makeFractalFunctionAcc True 2 }
-

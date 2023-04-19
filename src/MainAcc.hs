@@ -1,7 +1,12 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, FlexibleContexts, TypeFamilies, TypeOperators, FlexibleContexts #-}
+{-# LANGUAGE DeriveAnyClass
+           , DeriveGeneric
+           , FlexibleContexts
+           , TypeFamilies
+           , TypeOperators #-}
 
 module Main where
 
+import Prelude as P
 import ModelAcc
 import ControllerAcc
 import ViewAcc
@@ -12,9 +17,12 @@ import Graphics.Gloss.Interface.IO.Interact hiding (Vector)
 import Graphics.Gloss.Interface.IO.Game hiding (Vector)
 import Data.Array.Accelerate
 
-import Prelude as P
 
-
+-- | Main entry point for the program
+--   Start by console operations to obtain user input, then run the 'game'
+--   We use playIO instead of play to be able to have our inputHandler be in IO
+--   This allows us to re-run getGenData at the press of a button,
+--   while the app is running
 main :: IO ()
 main = do
     gd <- getGenData
@@ -29,6 +37,10 @@ main = do
             stepHandlerAcc  -- Step function
 
 
+-- | Given the generatorData obtained from the user, this creates a starter World
+--   see Model for more details on what this all includes
+--   The worldMatrix here is generated as an accelerate Matrix structure right away
+--   This avoids having to go back and forth several times during our step.
 startWorld :: GeneratorData -> World
 startWorld gd = MkWorld
     worldMatrix
@@ -37,12 +49,11 @@ startWorld gd = MkWorld
     Blank
     True
   where
-    fracFunc = makeFractalFunctionAcc False 2
     worldMatrix = fromList (Z:.x:.y) flatList :: Matrix (Float, Float)
       where
-        x = P.length gridPoint
-        y = P.length (head gridPoint)
+        x = screenWidth
+        y = screenHeight
         flatList = concat gridPoint
-        gridPoint = [[(P.fromIntegral $ x - halfScrW, P.fromIntegral $ y - halfScrH) 
-                     | x <- [0..screenWidth -1]] 
+        gridPoint = [[(P.fromIntegral $ x - halfScrW, P.fromIntegral $ y - halfScrH)
+                     | x <- [0..screenWidth -1]]
                       | y <- [0..screenHeight-1]]
