@@ -1,69 +1,47 @@
 module Generator (getSequences, getEscapeSteps) where
 
-import Graphics.Gloss
-import Graphics.Gloss.Interface.IO.Interact
-import Data.List
-import Data.List.Split
-import Data.Function
-
 import Model
 
+import Data.List
+import Data.Function
+
+import Graphics.Gloss
+import Graphics.Gloss.Interface.IO.Interact
+
+
 -- | Computes a fractal pattern based on fractal meta data and a given point
-generateFractal :: GeneratorData -> Point -> [Point] 
+generateFractal :: GeneratorData -> Point -> [Point]
 generateFractal genData pt = case parameter genData of
-  VarZ -> computeFractal genData {position = pt} 
+  VarZ -> computeFractal genData {position = pt}
   VarC -> computeFractal genData {offset   = pt}
-  _    -> error "Other functionalities are not yet defined."    
+  _    -> error "Other functionalities are not yet defined."
 
 -- | Generates the infinite fractal set, defining the iterations
 --   according to the generation data provided
 computeFractal :: GeneratorData -> [Point]
-computeFractal genData = let fracFunc = func     genData 
+computeFractal genData = let fracFunc = func     genData
                              c        = offset   genData
                              z        = position genData
-                         in 
+                         in
                            iterate (`fracFunc` c) z
-                            
+
 
 -- | Given a scaled grid, compute the sequences of iterations
+--   Note that the grid is eta-reduced
 getSequences :: GeneratorData -> Grid Point -> Grid [Point]
-getSequences genData grid = gridMap ( take (escapeRadius genData) -- limit the infinite sequence
-                                    . generateFractal genData     -- generate infinite sequence
-                                    ) grid                        -- the grid of points
+getSequences genData = gridMap ( take (escapeRadius genData)  -- limit the infinite sequence
+                               . generateFractal genData)     -- generate infinite sequence
 
 
 -- | Given a sequenced grid
 --   compute the steps in which the point escapes the treshold
+--   Note that the grid is eta-reduced
 getEscapeSteps :: Grid [Point] -> Grid Int
-getEscapeSteps grid = gridMap ( length              -- the amount of unescaped values
-                              . filter (== True)    -- discard all escaped values
-                              . map crossThreshold  -- convert the sequence to bools
-                              ) grid                -- the sequenced grid 
+getEscapeSteps = gridMap ( length               -- the amount of unescaped values
+                         . filter (== True)     -- discard all escaped values
+                         . map crossThreshold)  -- convert the sequence to bools
   where
     -- | Given a point, calculate whether it's close enough to the fractal interior
     --   zx or zy can also be either NaN or Infinity
     crossThreshold :: Point -> Bool
-    crossThreshold (zx, zy) = if (isNaN zx) || (isNaN zy) then False
-                              else (zx ** 2 + zy ** 2) < 100
-
-
-
-
-
-
-
----------- FATE OF CODE TBD --------------
-
--- -- generate possition for each pixel
--- getPixelPoint :: Int -> Int -> Point -> Point -> [Point]
--- getPixelPoint xPixels yPixels (xMin, yMin) (xMax, yMax) = map (,) [xMin, xMin + xGap .. xMax] <*> [yMin, yMin + yGap .. yMax]
---                                                           where xGap = (xMax - xMin) / fromIntegral (xPixels - 1)
---                                                                 yGap = (yMax - yMin) / fromIntegral (yPixels - 1)
-
--- -- reshape list/array
--- reshapeArray :: [a] -> Int -> [[a]]
--- reshapeArray xs xPixel = chunksOf xPixel xs
-
-
---figure1 = getEscapeStep (getFractalSequence mandelbrotSet (getPixelPoint 128 64 (-3.5,-2.1) (1.5,2.1))) 100
---figure2 = reshapeArray figure1 128
+    crossThreshold (zx, zy) = not (isNaN zx || isNaN zy) && (zx ** 2 + zy ** 2) < 100

@@ -87,7 +87,6 @@ parseEvent (EventKey key _ _ _) = case key of
                            _ -> Nothing
 parseEvent                 _ =  Nothing
 
-
 -- | One more vestigial function, used to handle a single event
 --   updating zoom and translation respectively depending on the nature of the event
 --   There used to be a function `eventStep :: [EventAction] -> (ZoomScale, Translation) -> (ZoomScale, Translation)`
@@ -116,17 +115,18 @@ doEvent e (z, (tx, ty)) = case e of
 --   When reading the step-by step at the side, please be mindful that this happens
 --   in inverse order: From bottom to top
 stepHandlerAcc :: Float -> World -> IO World
-stepHandlerAcc _ w@(MkWorld screen d tf _ True) = trace "Rendering... Please stand by" $ 
-  let picture  = draw                            -- turned into a pretty picture 'v'
-               . arr2Grid $ CPU.run              -- running accelerated process   :: Grid (Point, Color)
-               . A.zip (A.use screen)            -- zipping colour with position  :: Matrix (Point, Color)
-               . getColorsAcc (A.use colorList)  -- turned into colored matrix    :: Matrix Color
-               . getEscapeStepsAcc               -- turned into numbered matrix   :: Matrix Int
-               . getSequencesAcc d               -- turned into sequenced matrix  :: Cubic Point // Matrix [Point]
-               . (`scaleAcc` tf)                 -- Scaled to our parameters      :: Matrix Point
-               $ A.use screen                    -- The unscaled default screen   :: Matrix Point
-   in return $ w { currentPicture = picture
-                 , isChanged      = False }
+stepHandlerAcc _ w@(MkWorld screen d tf _ True) = do
+  putStrLn "Rendering... Please stand by"
+  let picture = draw                            -- turned into a pretty picture 'v'
+              . arr2Grid $ CPU.run              -- running accelerated process   :: Grid (Point, Color)
+              . A.zip (A.use screen)            -- zipping colour with position  :: Matrix (Point, Color)
+              . getColorsAcc (A.use colorList)  -- turned into colored matrix    :: Matrix Color
+              . getEscapeStepsAcc               -- turned into numbered matrix   :: Matrix Int
+              . getSequencesAcc d               -- turned into sequenced matrix  :: Cubic Point // Matrix [Point]
+              . (`scaleAcc` tf)                 -- Scaled to our parameters      :: Matrix Point
+              $ A.use screen                    -- The unscaled default screen   :: Matrix Point
+  return $ w { currentPicture = picture
+             , isChanged      = False }
 
 -- | Default case - nothing is changed
 stepHandlerAcc _ w = return w
@@ -142,4 +142,3 @@ scaleAcc gridAcc (zoom, (rOff, iOff)) = A.map f gridAcc
     f point = let r = A.fst point
                   i = A.snd point
                in A.lift (r A.* zoom' A.+ A.lift rOff, i A.* zoom' A.+ A.lift iOff)
-

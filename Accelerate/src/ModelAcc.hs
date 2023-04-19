@@ -10,7 +10,7 @@ import GHC.Float (int2Float)
 import Data.Array.Accelerate              as A
 
 
--- Separate properties of the screen
+-- | Dimensional properties of the screen
 screenWidth :: Int
 screenWidth = 1000
 
@@ -33,29 +33,29 @@ scaleFactor = 1.0 / (0.25 * int2Float screenWidth)
 --  The first argument is the starting point z and the second the complex parameter c
 type ZAcc = Exp (Float, Float)
 type CAcc = Exp (Float, Float)
+
 type FractalFunctionAcc = ZAcc -> CAcc -> Exp (Float, Float)
 
 -- | Describes which function parameter will be varied in the fractal generation function
 data VarParameter = VarZ
                   | VarC
-                  deriving (P.Eq)
 
 -- | Contains all information necessary to compute a fractal with a ZFunction
 data GeneratorData = GenData
-  { position         :: Exp (Float, Float)  -- Other name for z in fractal function
-  , offset           :: Exp (Float, Float)  -- Offset c in the fractal polynomial
-  , escapeRadius     :: Int                 -- The amount of iterations we perform
-  , parameter        :: VarParameter        -- Describes which function parameterr will be varied
-  , func             :: !FractalFunctionAcc -- Strictness required to ensure we do not calculate
-  }                                         -- the same function every iteration
+  { position         :: Exp (Float, Float)   -- Other name for z in fractal function
+  , offset           :: Exp (Float, Float)   -- Offset c in the fractal polynomial
+  , escapeRadius     :: Int                  -- The amount of iterations we perform
+  , parameter        :: VarParameter         -- Describes which function parameterr will be varied
+  , func             :: !FractalFunctionAcc  -- Strictness required to ensure we do not calculate
+  }                                          -- the same function every iteration
 
--- | Simply type synonyms to describe transformation: Zooming and translation
+-- | Simple type synonyms to describe transformation: Zooming and translation
 type ZoomScale = Float
 type Translation = (Float, Float)
 
 -- | Contains all information of the world state
 data World = MkWorld
-  { screen         :: Matrix (Float, Float)     -- The array with all screen values
+  { screen         :: Matrix (Float, Float)     -- The matrix with all screen values
   , gData          :: GeneratorData             -- The generatorData with which to compute the fractal
   , transform      :: (ZoomScale, Translation)  -- The transformation values
   , currentPicture :: Picture                   -- A cached version of our current picture
@@ -63,21 +63,26 @@ data World = MkWorld
   }
 
 
+-- | Datatypes describing events to change the scene
+--   Initially these were designed to be easily recorded in a list
+--   This would allow certain actions to happen every step
+--   Since this feature was scrapped, these are more-or-less vestigial
 data Zoom = In
           | Out
-  deriving (P.Eq, Show)
 
 data Direction = Left'
                | Right'
                | Up'
                | Down'
-  deriving (P.Eq, Show)
 
 data EventAction = Move Direction
                  | Zoom Zoom
-  deriving (P.Eq, Show)
 
--- | Arguments: Red Green Blue Alpha (all values should be in [0..1])
+
+-- | Type synonyms unique to the Accelerated project:
+--   A representation for Colours that can be accelerated over
+--   and a shorthand for three-dimensional accelerated structures
+--   For ColourAcc: (R, G, B, A,) -- all values should be in [0..1]
 type ColorAcc = (Float, Float, Float, Float)
 type Cubic = Array DIM3
 
@@ -89,27 +94,25 @@ type Cubic = Array DIM3
 --   Second: degree n of the polynomial z^n + c
 --   Polynomial degrees <= 0 or non-integer polynomial degrees are not supported
 makeFractalFunctionAcc :: Bool -> Int -> FractalFunctionAcc
-makeFractalFunctionAcc isAbs degree
-  = let
-      polyAcc :: Exp (Float, Float) -> Exp (Float, Float)
-      polyAcc point = let absPoint = A.lift (A.abs (A.fst point), A.abs (A.snd point))
-                       in if isAbs
-                            then computePolynomialAcc absPoint degree
-                            else computePolynomialAcc point degree
-      fractalPointAcc :: Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
-      fractalPointAcc pointZ pointC = A.lift ( A.fst pointZ A.+ A.fst pointC
-                                             , A.snd pointZ A.+ A.snd pointC)
-    in
-      fractalPointAcc . polyAcc
+makeFractalFunctionAcc isAbs degree =
+  let
+    polyAcc :: Exp (Float, Float) -> Exp (Float, Float)
+    polyAcc point = let absPoint = A.lift (A.abs (A.fst point), A.abs (A.snd point))
+                    in if isAbs
+                       then computePolynomialAcc absPoint degree
+                       else computePolynomialAcc point degree
+    fractalPointAcc :: Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
+    fractalPointAcc pointZ pointC = A.lift ( A.fst pointZ A.+ A.fst pointC
+                                           , A.snd pointZ A.+ A.snd pointC)
+  in fractalPointAcc . polyAcc
 
-
--- | compute polynomial values given a complex number z = Re(z) + Im(z),
--- for now we assume that degree n is a positive integer
+-- | Compute polynomial values given a complex number z = Re(z) + Im(z),
+--   We assume that degree n is a positive integer
 computePolynomialAcc :: Exp (Float, Float) -> Int -> Exp (Float, Float)
 computePolynomialAcc z 1 = z
-computePolynomialAcc z n | n P.<= 0    = error ("Non-positive number given as argument: " P.++
+computePolynomialAcc z n | n P.<= 0  = error ("Non-positive number given as argument: " P.++
                                               show n P.++ ". Please give a positive number")
-                         | P.even n    = computePolynomialAcc (complexMulAcc z z) (n `div` 2)
+                         | P.even n  = computePolynomialAcc (complexMulAcc z z) (n `div` 2)
                          | otherwise = complexMulAcc z $ computePolynomialAcc z (n-1)
 
 
@@ -117,7 +120,7 @@ computePolynomialAcc z n | n P.<= 0    = error ("Non-positive number given as ar
 
 complexMulAcc :: Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
 complexMulAcc point1 point2 = A.lift ( a A.* c A.- b A.* d
-                           , a A.* d A.+ b A.* c )
+                                     , a A.* d A.+ b A.* c )
                            where a = A.fst point1
                                  b = A.snd point1
                                  c = A.fst point2

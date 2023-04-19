@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts
            , TypeFamilies #-}
 
-module MainAcc where
+module MainAcc (main) where
 
 import Prelude as P
 import ModelAcc
@@ -25,7 +25,7 @@ main = do
     gd <- getGenData
     let world = startWorld gd
 
-    playIO (InWindow "Fractals" (screenHeight, screenWidth) (0, 0))
+    playIO (InWindow "Fraskell" (screenHeight, screenWidth) (0, 0))
             black           -- Background color
             60              -- Frames per second
             world           -- Initial state
@@ -50,7 +50,7 @@ startWorld gd = MkWorld
       where
         x = screenWidth
         y = screenHeight
-        flatList = concat gridPoint
-        gridPoint = [[(P.fromIntegral $ x - halfScrW, P.fromIntegral $ y - halfScrH)
+        flatList  = concat worldGrid
+        worldGrid = [[(P.fromIntegral $ x - halfScrW, P.fromIntegral $ y - halfScrH)
                      | x <- [0..screenWidth -1]]
                       | y <- [0..screenHeight-1]]

@@ -4,25 +4,23 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
 import GHC.Float (int2Float)
 
--- Separate properties of the screen
+
+-- | Dimensional properties of the screen
 screenWidth :: Int
-screenWidth = 500
+screenWidth = 1000
 
 screenHeight :: Int
-screenHeight = 500
+screenHeight = 1000
 
 halfScrW :: Int
 halfScrW = screenWidth `div` 2
 
-halfScrH :: Int 
+halfScrH :: Int
 halfScrH = screenHeight `div` 2
 
 scaleFactor :: Float
 scaleFactor = 1.0 / (0.25 * int2Float screenWidth)
 
-
-type ZoomScale = Float
-type Translation = (Float, Float)
 
 ---- Data types regarding the representation and calculation of fractals
 
@@ -31,71 +29,72 @@ type Translation = (Float, Float)
 type Z = Point
 type C = Point
 
-type FractalFunction = Z -> C -> Point  
+type FractalFunction = Z -> C -> Point
 
 -- | Describes which function parameter will be varied in the fractal generation function
-data VarParameter = VarZ 
-                  | VarC 
-                  | VarZandC
+data VarParameter = VarZ
+                  | VarC
 
 -- | Contains all information necessary to compute a fractal with a ZFunction
 data GeneratorData = GenData
-  { position         :: Point            -- other name for z in fractal function?
-  , offset           :: Point            -- offset c in the fractal polynomial
-  , escapeRadius     :: Int              -- TO BE EXPLAINED 
-  , parameter        :: VarParameter 
-  , func             :: !FractalFunction -- Strictness required to ensure we do not calculate  
-  }                                      -- the same function every iteration
+  { position         :: Point             -- other name for z in fractal function
+  , offset           :: Point             -- offset c in the fractal polynomial
+  , escapeRadius     :: Int               -- The amount of iterations we perform
+  , parameter        :: VarParameter      -- Describes which function parameterr will be varied
+  , func             :: !FractalFunction  -- Strictness required to ensure we do not calculate
+  }                                       -- the same function every iteration
 
-data World = MkWorld 
-  { screen         :: Grid Point
-  , gData          :: GeneratorData
-  , transform      :: (ZoomScale, Translation)
-  , currentPicture :: Picture  
-  , isChanged      :: Bool
+-- | Simple type synonyms to describe transformation: Zooming and translation
+type ZoomScale = Float
+type Translation = (Float, Float)
+
+-- | Contains all information of the world state
+data World = MkWorld
+  { screen         :: Grid Point                -- The grid with all screen values
+  , gData          :: GeneratorData             -- The generatorData with which to compute the fractal
+  , transform      :: (ZoomScale, Translation)  -- The transformation values
+  , currentPicture :: Picture                   -- A cached version of our current picture
+  , isChanged      :: Bool                      -- Flags whether we need to recompute
   }
 
 
+-- | Datatypes describing events to change the scene
+--   Initially these were designed to be easily recorded in a list
+--   This would allow certain actions to happen every step
+--   Since this feature was scrapped, these are more-or-less vestigial
 data Zoom = In
           | Out
-  deriving (Eq, Show)
 
 data Direction = Left'
                | Right'
                | Up'
                | Down'
-  deriving (Eq, Show)
 
 data EventAction = Move Direction
                  | Zoom Zoom
-  deriving (Eq, Show)
-  
 
 
 ---- Functions for generating the fractal
 
 -- | Create the fractal characteristic function based on user input
--- First input argument: take absolute of starting point (|Re(z)| + |Im(z)|)^n + c if True 
--- Second: degree n of the polynomial z^n + c 
-
+--   First input argument: take absolute of starting point (|Re(z)| + |Im(z)|)^n + c if True
+--   Second: degree n of the polynomial z^n + c
+--   Polynomial degrees <= 0 or non-integer polynomial degrees are not supported
 makeFractalFunction :: Bool -> Int -> FractalFunction
-makeFractalFunction isAbs degree            -- do we want decimal degrees? like z^1.5?
-  = let  
-      -- poly :: Point -> Point    
-      poly (zReal, zImag) = if isAbs then computePolynomial (abs zReal, abs zImag) degree 
-                                     else computePolynomial (zReal, zImag) degree 
-      -- fractalpoint :: Point -> Point -> Point
-      fractalPoint (zReal', zImag') (cReal, cImag) = (zReal' + cReal, zImag' + cImag) 
-    in  
-      fractalPoint . poly                  
-  
+makeFractalFunction isAbs degree =
+  let
+      poly (zReal, zImag) = if isAbs 
+                            then computePolynomial (abs zReal, abs zImag) degree
+                            else computePolynomial (zReal, zImag) degree
+      fractalPoint (zReal', zImag') (cReal, cImag) = (zReal' + cReal, zImag' + cImag)
+  in fractalPoint . poly
 
--- | compute polynomial values given a complex number z = Re(z) + Im(z),
--- for now we assume that degree n is a positive integer 
+-- | Compute polynomial values given a complex number z = Re(z) + Im(z),
+--   We assume that degree n is a positive integer
 computePolynomial :: Point -> Int -> Point
-computePolynomial z 1 = z  
-computePolynomial z n | n <= 0    = error ("Non-positive number given as argument: " ++ 
-                                           show n ++ ". Please give a positive number") 
+computePolynomial z 1 = z
+computePolynomial z n | n <= 0    = error ("Non-positive number given as argument: " ++
+                                           show n ++ ". Please give a positive number")
                       | even n    = computePolynomial (complexMul z z) (n `div` 2)
                       | otherwise = complexMul z $ computePolynomial z (n-1)
 
@@ -105,6 +104,7 @@ computePolynomial z n | n <= 0    = error ("Non-positive number given as argumen
 complexMul :: Point -> Point -> Point
 complexMul (a, b) (c, d) = ( a * c - b * d
                            , a * d + b * c )
+
 
 type Grid a = [[a]]
 
@@ -122,19 +122,3 @@ colorList = [makeColorI r g b a | (r,g,b,a) <- rgbs ]
            , (99 , 167, 94 , 255)
            , (160, 172, 180, 255)
            , (68 , 62 , 94 , 255)]
-
--- How to get from a fixed grid of 2-D floating point to adjustable fractals/pictures:
-    -- 1.  Initialise world
-    -- 2.  record user's panning and zoom (later users can also define their own fractal
-    --     parameters so they can make their own fractals)
-    -- 3.  Adjust current translation value to sum of current and input values 
-    -- 4.  Same for zoom but now by a certain multiplication formula
-    -- 5.  Apply translation to each point in the grid
-    -- 6.  Apply zoom scaling to each of the resulting points
-    -- 7.  Pass the resulting 2D matrix to the generateFractal function: this returns
-    --     a 2D array of numeric values.
-    -- 8.  Pass this matrix to a colourMatrix function that maps the values to colours.
-    -- 9.  Embed each colour in the resulting colourMatrix in a Picture type and combine 
-    --     (fold hihi) all those pictures recursively into one picture.
-    -- 10. Embed picture in the world and call drawHandler. 
-    

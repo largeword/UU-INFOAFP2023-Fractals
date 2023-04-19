@@ -1,4 +1,4 @@
-module ConsoleAcc where
+module ConsoleAcc (getGenData) where
 
 import ModelAcc
 
@@ -19,8 +19,8 @@ getGeneratorBase :: IO GeneratorData
 getGeneratorBase = do
   putStrLn "\nWould you like to launch a default implementation? [y|n]\n"
 
-  c <- getChar
-  _ <- getChar
+  c <- getChar -- getChar only seems to read an input after the user presses enter
+  _ <- getChar -- this empty read parses the newline character and throws it away
   case c of
     'y' -> getDefaultImplementation
     'n' -> getSpecifiedImplementation
@@ -39,7 +39,6 @@ getEscapeRadius gd = do
       Nothing -> do putStrLn "Unable to parse input.  Please make sure to enter an integer value"
                     getEscapeRadius gd
       Just a  -> return gd {escapeRadius = a}
-
 
 
 getSpecifiedImplementation :: IO GeneratorData
@@ -64,8 +63,8 @@ getSpecifiedImplementation = do
         putStrLn "Or over the offset (as in the Julia set)"
         putStrLn "[m|j]\n"
 
-        c <- getChar
-        _ <- getChar
+        c <- getChar -- getChar only seems to read an input after the user presses enter
+        _ <- getChar -- this empty read parses the newline character and throws it away
         case c of
           'm' -> return VarC
           'j' -> return VarZ
@@ -78,8 +77,8 @@ getSpecifiedImplementation = do
         putStrLn "(as in the Burning Ship fractals)?"
         putStrLn "[y|n]\n"
 
-        c <- getChar
-        _ <- getChar
+        c <- getChar -- getChar only seems to read an input after the user presses enter
+        _ <- getChar -- this empty read parses the newline character and throws it away
         case c of
           'y' -> return True
           'n' -> return False
@@ -101,7 +100,6 @@ getSpecifiedImplementation = do
                      then return a
                      else do putStrLn "As of now, only positive integer polynomials > 0 are supported"
                              getPolyDegree
-
 
 
 getDefaultImplementation :: IO GeneratorData

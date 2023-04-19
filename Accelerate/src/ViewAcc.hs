@@ -67,10 +67,10 @@ float2ColorAcc :: Acc (A.Vector ColorAcc) -> Exp Float -> Exp ColorAcc
 float2ColorAcc colorsAcc x = let x' = A.ifThenElse (A.isNaN x)
                                                    (A.toFloating (A.length colorsAcc A.- 1))
                                                    x :: Exp Float
-                                 floorX = A.floor x'
+                                 floorX   = A.floor x'
                                  ceilingX = A.ceiling x'
                                  mixProportion = (x' A.-) . A.toFloating $ floorX :: Exp Float
-                             in  mixColorsAcc mixProportion
+                              in mixColorsAcc mixProportion
                                               (1 - mixProportion)
                                               (colorsAcc A.!! floorX)
                                               (colorsAcc A.!! ceilingX)

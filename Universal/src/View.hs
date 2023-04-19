@@ -2,15 +2,15 @@ module View (drawHandler, draw, getColors) where
 
 import Model
 
+import GHC.Float (int2Float)
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Interact
-import GHC.Float (int2Float)
-
-import Debug.Trace
 
 
-drawHandler :: World -> Picture
-drawHandler (MkWorld _ _ _ p _) = p
+-- | Main tick draw function
+--   Returns the cached picture p
+drawHandler :: World -> IO Picture
+drawHandler (MkWorld _ _ _ p _) = return p
 
 
 -- | Function called in the last step of the step
@@ -29,9 +29,6 @@ pointToPicture :: (Point, Color) -> Picture
 pointToPicture ((x, y), c) = Translate x y $ Color c $ Circle 1
 
 
-
-
-
 -- | This function maps the Grid of escaping steps into the corresponding colors
 getColors :: [Color] -> Grid Int -> Grid Color
 getColors colors grid = let grid' = rescaleGrid2ColorRange colors grid
@@ -39,22 +36,24 @@ getColors colors grid = let grid' = rescaleGrid2ColorRange colors grid
 
 
 -- | This function maps the input Grid Int into the right range of color list with decimals
---   https://intellipaat.com/community/33375/convert-a-number-range-to-another-range-maintaining-the-ratio
 rescaleGrid2ColorRange :: [Color] -> Grid Int -> Grid Float
-rescaleGrid2ColorRange colors grid = 
+rescaleGrid2ColorRange colors grid =
   let gridMax  = int2Float . maximum    . concat $ grid
       gridMin  = int2Float . minimum    . concat $ grid
       colMax   = int2Float . subtract 1 . length $ colors
-      f        = \x -> if gridMax == 0 then 0 else ((int2Float x) - gridMin)  * (colMax) / (gridMax - gridMin)  -- 0/0 = NaN
-
+      f        = \x -> if gridMax == 0 
+                       then 0 
+                       else (int2Float x - gridMin)  * colMax / (gridMax - gridMin)  -- 0/0 = NaN
    in gridMap f grid
 
 
 -- | This function takes a color list and a float number, then find the nearest two colors in the list 
 --   according to float as index, and mix these colors with the right proportion
 float2Color :: [Color] -> Float -> Color
-float2Color colors x = let x' = if isNaN x then trace "NaN" $ int2Float (length colors - 1) else x  -- If NaN, it means no steps are not escaping 
-                           floorX = floor x'
+float2Color colors x = let x' = if isNaN x 
+                                then int2Float (length colors - 1) 
+                                else x
+                           floorX   = floor x'
                            ceilingX = ceiling x'
                            mixProportion = (x' -) . int2Float $ floorX
                         in mixColors mixProportion
