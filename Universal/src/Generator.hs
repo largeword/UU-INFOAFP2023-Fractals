@@ -14,7 +14,6 @@ generateFractal :: GeneratorData -> Point -> [Point]
 generateFractal genData pt = case parameter genData of
   VarZ -> computeFractal genData {position = pt}
   VarC -> computeFractal genData {offset   = pt}
-  _    -> error "Other functionalities are not yet defined."
 
 -- | Generates the infinite fractal set, defining the iterations
 --   according to the generation data provided

@@ -28,8 +28,12 @@ inputHandler :: Event -> World -> IO World
 -- | This is a case involving an action that happens immediately once.
 --   Such as selecting a point for which to generate the Julia:
 --   'lmb' selects the current mouse position as new offset point
+--   Since the point we variate over overrides either offset or position during the generation,
+--   it is fine to just set both here.
+--   This allows the click-functionality to work on both mandelbrot and julia fractals.
 inputHandler (EventKey (MouseButton LeftButton) Down _ (x, y)) w =
-  let newData = (gData w) { offset = lift (x * scaleFactor, y * scaleFactor)}
+  let newPoint = lift (x * scaleFactor, y * scaleFactor)
+      newData = (gData w) { offset = newPoint, position = newPoint }
    in return $ w { gData     = newData
                  , isChanged = True}
 

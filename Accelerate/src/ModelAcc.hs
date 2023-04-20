@@ -23,14 +23,16 @@ halfScrW = screenWidth `div` 2
 halfScrH :: Int
 halfScrH = screenHeight `div` 2
 
+-- | making the scale factor dependant on the smallest of screenWidth and screenHeight
+--   ensures the default scale always shows the whole fractal
 scaleFactor :: Float
-scaleFactor = 1.0 / (0.25 * int2Float screenWidth)
+scaleFactor = 1.0 / (0.25 * int2Float (min screenWidth screenHeight))
 
 
 ---- Data types regarding the representation and calculation of fractals
 
 -- | A type synonym to define the abstract point calculation function
---  The first argument is the starting point z and the second the complex parameter c
+--   The first argument is the starting point z and the second the complex parameter c
 type ZAcc = Exp (Float, Float)
 type CAcc = Exp (Float, Float)
 
