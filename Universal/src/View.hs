@@ -41,9 +41,10 @@ rescaleGrid2ColorRange colors grid =
   let gridMax  = int2Float . maximum    . concat $ grid
       gridMin  = int2Float . minimum    . concat $ grid
       colMax   = int2Float . subtract 1 . length $ colors
-      f        = \x -> if gridMax == 0 || (int2Float x - gridMin) == 0
+      f        = \x -> let gap = (int2Float x - gridMin) in 
+                       if gridMax == 0 || (int2Float x - gridMin) == 0
                        then 0 
-                       else (int2Float x - gridMin)  * colMax / (gridMax - gridMin)  -- 0/0 = NaN
+                       else gap * colMax / (gridMax - gridMin)  -- 0/0 = NaN
    in gridMap f grid
 
 
