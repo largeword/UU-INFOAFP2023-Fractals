@@ -4,6 +4,7 @@ import qualified Test.Tasty.QuickCheck as QC
 import qualified Data.Array.Accelerate              as A (use, lift)
 import qualified Data.Array.Accelerate.LLVM.Native  as CPU (run)
 import ModelAcc
+import ViewAcc
 import ControllerAcc (scaleAcc)
 import Test.Tasty (defaultMain, testGroup, TestTree)
 
@@ -52,8 +53,8 @@ gd = GenData { position     = A.lift (0 :: Float, 0 :: Float)
 
 
 -- | This property tests the correctness of GA.grid2Arr and GA.arr2Grid
-prop_grid2Arr2Grid :: CustomGrid -> Bool
-prop_grid2Arr2Grid (CustomGrid grid) = grid == GA.arr2Grid (GA.grid2Arr grid)
+prop_grid2Arr2GridAcc :: CustomGrid -> Bool
+prop_grid2Arr2GridAcc (CustomGrid grid) = grid == GA.arr2Grid (GA.grid2Arr grid)
 
 
 -- | This property tests whether the escaping step is within a reasonable range
@@ -61,15 +62,29 @@ prop_getEscapeStepsAcc :: CustomGridPoint -> (Float, (Float, Float)) -> CustomIn
 prop_getEscapeStepsAcc (CustomGridPoint grid) tf (CustomInt r) = foldl (\a b -> b >= 0 && b <= escapeRadius gd' && a) 
                                                                        True 
                                                                        grid'
-  where gd' = gd {escapeRadius = r}
-        grid' = concat (GA.arr2Grid escapingStep)
+  where grid'        = concat (GA.arr2Grid escapingStep)
         escapingStep = CPU.run $ GA.getEscapeStepsAcc 
                      . GA.getSequencesAcc gd' 
                      . (`scaleAcc` tf) $ A.use (GA.grid2Arr grid)
+        gd'          = gd {escapeRadius = r}
 
 
+-- | This property tests whether the escaping step is within a reasonable range
+prop_mapColorRangeAcc :: CustomGridPoint -> (Float, (Float, Float)) -> CustomInt -> Bool
+prop_mapColorRangeAcc (CustomGridPoint grid) tf (CustomInt r) = foldl (\a b -> b >= 0.0 && b <= 5.0 && a) 
+                                                                       True 
+                                                                       grid''
+  where grid''       = concat (GA.arr2Grid grid')
+        grid'        = CPU.run $ rescaleGrid2ColorRangeAcc (A.use colorList) escapingStep
+        escapingStep = GA.getEscapeStepsAcc 
+                     . GA.getSequencesAcc gd' 
+                     . (`scaleAcc` tf) $ A.use (GA.grid2Arr grid)
+        gd'          = gd {escapeRadius = r}
+        
+        
 tests :: TestTree
 tests = testGroup "Tested by QuickCheck"
-  [ QC.testProperty "Grid -> Arr -> Grid" prop_grid2Arr2Grid
-  , QC.testProperty "Escaping Step within Range" prop_getEscapeStepsAcc]
+  [ QC.testProperty "Grid -> Arr -> Grid" prop_grid2Arr2GridAcc
+  , QC.testProperty "Escaping Step within Range" prop_getEscapeStepsAcc
+  , QC.testProperty "Color Index within Range" prop_mapColorRangeAcc]
 
