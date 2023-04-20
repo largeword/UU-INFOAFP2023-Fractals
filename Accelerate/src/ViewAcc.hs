@@ -3,7 +3,7 @@
            , UndecidableInstances
            , AllowAmbiguousTypes #-}
 
-module ViewAcc (drawHandler, draw, getColorsAcc) where
+module ViewAcc (drawHandler, draw, getColorsAcc, rescaleGrid2ColorRangeAcc) where
 
 import ModelAcc
 
@@ -55,7 +55,7 @@ rescaleGrid2ColorRangeAcc colorsAcc gridAcc =
       gridAccMin  = A.toFloating (A.minimum gridAccFlat A.!! 0) :: Exp Float
       colMax      = A.toFloating . A.subtract 1 . A.length $ colorsAcc :: Exp Float
       f :: Exp Int -> Exp Float
-      f           = \x -> A.ifThenElse (gridAccMax A.== 0)
+      f           = \x -> A.ifThenElse (gridAccMax A.== 0 A.|| (A.toFloating x A.- gridAccMin) A.== 0)
                                        0.0
                                        ((A.toFloating x A.- gridAccMin)  A.* colMax A./ (gridAccMax - gridAccMin))
    in A.map f gridAcc

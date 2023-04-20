@@ -1,7 +1,9 @@
 import System.Environment
+import GHC.Float (int2Float)
 import qualified Generator as G
 import qualified Test.Tasty.QuickCheck as QC
 import Model
+import View
 import Controller (scale)
 import Test.Tasty (defaultMain, testGroup, TestTree)
 
@@ -50,17 +52,30 @@ gd = GenData { position     = (0 :: Float, 0 :: Float)
 
 
 -- | This property tests whether the escaping step is within a reasonable range
-prop_getEscapeStepsAcc :: CustomGridPoint -> (Float, (Float, Float)) -> CustomInt -> Bool
-prop_getEscapeStepsAcc (CustomGridPoint grid) tf (CustomInt r) = foldl (\a b -> b >= 0 && b <= escapeRadius gd' && a) 
+prop_getEscapeSteps :: CustomGridPoint -> (Float, (Float, Float)) -> CustomInt -> Bool
+prop_getEscapeSteps (CustomGridPoint grid) tf (CustomInt r) = foldl (\a b -> b >= 0 && b <= escapeRadius gd' && a) 
                                                                        True 
                                                                        grid'
-  where grid' = concat escapingStep
+  where grid'        = concat escapingStep
         escapingStep = G.getEscapeSteps 
                      . G.getSequences gd' 
                      . (`scale` tf) $ grid
-        gd' = gd {escapeRadius = r}
+        gd'          = gd {escapeRadius = r}
+
+
+-- | This property tests whether the mapping color value is within a reasonable range
+prop_mapColorRange :: CustomGridPoint -> (Float, (Float, Float)) -> CustomInt -> Bool
+prop_mapColorRange (CustomGridPoint grid) tf (CustomInt r) = foldl (\a b -> b >= 0.0 && b <= int2Float (length colorList) && a) 
+                                                                   True
+                                                                   grid'
+  where grid'        = concat (rescaleGrid2ColorRange colorList escapingStep)
+        escapingStep = G.getEscapeSteps 
+                     . G.getSequences gd' 
+                     . (`scale` tf) $ grid
+        gd'          = gd {escapeRadius = r}
 
 
 tests :: TestTree
 tests = testGroup "Tested by QuickCheck"
-  [ QC.testProperty "Escaping Step within Range" prop_getEscapeStepsAcc]
+  [ QC.testProperty "Escaping Step within Range" prop_getEscapeSteps
+  , QC.testProperty "Color Index within Range" prop_mapColorRange]
