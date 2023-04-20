@@ -69,7 +69,7 @@ prop_getEscapeStepsAcc (CustomGridPoint grid) tf (CustomInt r) = foldl (\a b -> 
         gd'          = gd {escapeRadius = r}
 
 
--- | This property tests whether the escaping step is within a reasonable range
+-- | This property tests whether the mapping color value is within a reasonable range
 prop_mapColorRangeAcc :: CustomGridPoint -> (Float, (Float, Float)) -> CustomInt -> Bool
 prop_mapColorRangeAcc (CustomGridPoint grid) tf (CustomInt r) = foldl (\a b -> b >= 0.0 && b <= 5.0 && a) 
                                                                        True 
