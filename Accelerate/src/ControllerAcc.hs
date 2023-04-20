@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts
            , TypeFamilies #-}
 
-module ControllerAcc (inputHandler, stepHandlerAcc) where
+module ControllerAcc (inputHandler, stepHandlerAcc, scaleAcc) where
 
 import ModelAcc
 import GeneratorAcc

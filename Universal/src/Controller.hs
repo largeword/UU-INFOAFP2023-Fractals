@@ -1,4 +1,4 @@
-module Controller (inputHandler, stepHandler) where
+module Controller (inputHandler, stepHandler, scale) where
 
 import Model
 import Generator
