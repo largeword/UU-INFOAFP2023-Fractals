@@ -26,7 +26,7 @@ halfScrH = screenHeight `div` 2
 -- | making the scale factor dependant on the smallest of screenWidth and screenHeight
 --   ensures the default scale always shows the whole fractal
 scaleFactor :: Float
-scaleFactor = 1.0 / (0.25 * int2Float (min screenWidth screenHeight))
+scaleFactor = 1.0 / (0.25 * int2Float (P.min screenWidth screenHeight))
 
 
 ---- Data types regarding the representation and calculation of fractals
