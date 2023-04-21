@@ -1,7 +1,13 @@
 # UU-INFOAFP2023-Fraskell: Exploring Fractals in Haskell
 This is the group project (rendering fractals) repository of [Advanced Functional Programming 2022/2023](https://www.cs.uu.nl/docs/vakken/afp/project.html) in Utrecht University.
 
-Please fine the excutable file at the release section.
+The Accelerate folder contains source code to build and run the accelerated project in Cabal.
+Due to Accelerate's constraints, it will work only on systems with CUDA-enabled GPUs and unix operating systems
+The Universal folder contains source code to build and run a version of the project that may run on any Haskell-enabled system
+
+Additionally, please find pre-built excutable files at the release section of the github project
+Features described in this document are universal between the two versions: The only difference is acceleration
+
 
 **Controlling keys:** \
                  &emsp; w -> Move Up\
@@ -14,10 +20,11 @@ Please fine the excutable file at the release section.
                  &emsp; KeyRight -> Move Right\
                  &emsp; q -> Zoom Out\
                  &emsp; e -> Zoom In\
-                 &emsp; r -> Reset Offset and Zooming\
-                 &emsp; g -> Re-generate Fractal
-                 
-**Project docs:**
-  1. [Project proposal](https://github.com/largeword/UU-INFOAFP2023-Fractals/blob/main/_Docs/INFOAFP_Project_Proposal.pdf)
-  2. [Status report](https://github.com/largeword/UU-INFOAFP2023-Fractals/blob/main/_Docs/INFOAFP_Project_Status_Report.pdf)
-  3. [Final report](https://www.overleaf.com/1151294891cwpktdhdrmkh) !need to replace this overleaf link!
+                 &emsp; left mouseclick -> set offset to mouse coordinates\
+                 &emsp; r -> Reset translation and zoom scale\
+                 &emsp; g -> Re-generate fractal generation data
+
+Please note that the application takes some time to generate the fractal after a key-press.  In particularly the mouse click may take longer to register and generate.
+
+Project documentation is included in this hand-in, in the _Docs folder
+Please enjoy the Fraskell tool
