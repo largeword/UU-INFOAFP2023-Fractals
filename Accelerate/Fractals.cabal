@@ -47,7 +47,7 @@ executable Fractals
                  ,    accelerate-llvm-ptx
                  ,    llvm-hs
                  ,    llvm-hs-pure
-                 ,    libffi == 0.1
+                 ,    libffi
     
     hs-source-dirs:   src
     
@@ -77,7 +77,7 @@ library
                  ,    accelerate-llvm-ptx
                  ,    llvm-hs
                  ,    llvm-hs-pure
-                 ,    libffi == 0.1
+                 ,    libffi
     
     hs-source-dirs:   src
     
@@ -99,7 +99,7 @@ test-suite Fractals-test
                  ,    accelerate-llvm-ptx
                  ,    llvm-hs
                  ,    llvm-hs-pure
-                 ,    libffi == 0.1
+                 ,    libffi
                  ,    tasty
                  ,    tasty-quickcheck
                  

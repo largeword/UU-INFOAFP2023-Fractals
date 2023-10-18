@@ -2,24 +2,21 @@
 
 packages: .
 
--- change the following path (restricted to GHC 9.0.2)
-with-compiler: /home/luxinliang/.ghcup/ghc/9.0.2/bin/ghc
-
 source-repository-package
     type: git
     location: https://github.com/AccelerateHS/accelerate
-    tag: 5971c5d8e4dbba28d2017e7ce422cf46a20197cb
+    tag: 17466411109170c4e4361d9980f1cded0eb85efb
 
 source-repository-package
     type: git
     location: https://github.com/AccelerateHS/accelerate-llvm
-    tag: 2cd65569c875477b5250d54f0d0738d8ee28e597
+    tag: 2b5d69448557e89002c0179ea1aaf59bb757a6e3
     subdir: accelerate-llvm accelerate-llvm-native accelerate-llvm-ptx
 
 source-repository-package
     type: git
     location: https://github.com/llvm-hs/llvm-hs
-    tag: 423220bffac4990d019fc088c46c5f25310d5a33
+    tag: 5bca2c1a2a3aa98ecfb19181e7a5ebbf3e212b76
     subdir: llvm-hs-pure llvm-hs
 
 allow-newer: bytestring
